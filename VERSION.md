@@ -1,5 +1,134 @@
 # RR Skill Version Log
 
+## v2.0-alpha (2024-05-24)
+
+### Release Summary
+
+V2-alpha 最小切片：实现 Project State & Rule Memory。
+
+**新增功能**：
+- CURRENT_STATE.md - 记录当前 RR 阶段，防止阶段跳跃
+- LAST_LOCKED_PLAN.md - 防止 implement 阶段重新解释需求
+- archive 规范 - patch 完成后归档流程
+- promote-rule 规则 - 明确不是每个 bug 都进入长期 PATCH_RULES
+- 目录结构扩展：`.rr/state/`、`.rr/archive/`
+
+---
+
+### New Features
+
+#### 1. CURRENT_STATE.md
+
+记录当前 RR 流程的阶段状态。
+
+**Phase Flow**：
+```
+none → analyze (DRAFT) → analyze (LOCKED) → commit → implement → verify → done
+```
+
+**硬规则**：
+- 禁止跳跃阶段
+- 每次阶段变化必须更新此文件
+
+#### 2. LAST_LOCKED_PLAN.md
+
+保存最近一次锁定的 Analyze 结果。
+
+**硬规则**：
+- Implement 阶段禁止重新解释需求
+- 如需改变理解，必须 STOP 并返回 rr analyze
+
+#### 3. Archive 规范
+
+patch 完成后归档流程：
+1. 确认 VERIFY_REPORT 状态为 PASS 或 WARNING（已人工验证）
+2. 创建归档目录：`.rr/archive/YYYY-MM-DD-patch-XXX/`
+3. 移动 `.rr/current/` 和 `.rr/state/` 文件到归档目录
+4. 清空 `.rr/current/` 和 `.rr/state/`（准备下一个 patch）
+5. 评估是否 promote rule
+
+#### 4. Promote Rule 规则
+
+只有符合以下条件才写入 `.rr/rules/PATCH_RULES.md`：
+
+| Criterion | Required |
+|-----------|----------|
+| Severity | High / Critical |
+| Pattern | Yes |
+| Recurrence Risk | High |
+| User Confirmation | Required |
+
+**禁止**：将一次性 bug、低风险修复、简单 typo 写入长期规则。
+
+---
+
+### Directory Structure (v2.0)
+
+```
+.rr/
+├── rules/          # 长期规则（跨 patch 复用）
+├── current/        # 当前 patch 文档
+├── state/          # 状态文件（防止跳跃/重新解释）
+└── archive/        # 归档文件
+```
+
+| Directory | Purpose | Lifecycle |
+|-----------|---------|-----------|
+| `.rr/rules/` | 长期 Regression Rules | 永久 |
+| `.rr/current/` | 当前 patch 文档 | 当前 patch |
+| `.rr/state/` | RR 阶段状态 | 当前 patch |
+| `.rr/archive/` | 已完成 patch 归档 | 永久 |
+
+---
+
+### Documentation Unification
+
+统一 PASS/WARNING/FAIL 表述：
+
+| Status | Action (v2.0) |
+|--------|---------------|
+| PASS | 边界检查通过，可进入提交前人工审查 |
+| WARNING | 必须人工验证后才能决定是否提交 |
+| FAIL | 必须停止并返回 rr analyze |
+
+**消除表述**：
+- ❌ "PASS 可提交"
+- ❌ "WARNING 需补充验证后提交"
+- ❌ "FAIL 必须回滚"
+
+---
+
+### File Changes
+
+| File | Status | Change |
+|------|--------|--------|
+| templates/CURRENT_STATE.md | New | RR 阶段状态模板 |
+| templates/LAST_LOCKED_PLAN.md | New | 锁定计划模板 |
+| templates/PATCH_RULES.md | New | 长期规则模板（含 promote 规则） |
+| .rr-example/state/CURRENT_STATE.md | New | 示例状态文件 |
+| .rr-example/state/LAST_LOCKED_PLAN.md | New | 示例锁定计划 |
+| .rr-example/archive/README.md | New | 归档规范说明 |
+| RR_SKILL.md | Modified | 增加 state/rules/archive 说明 |
+| docs/QUICK_START.md | Modified | 增加目录说明、统一表述 |
+| docs/WORKFLOW.md | Modified | 增加状态文件说明、promote 规则 |
+| VERSION.md | Modified | v2.0-alpha 记录 |
+
+---
+
+### Not Implemented (v2 scope)
+
+以下功能未在 v2.0-alpha 实现：
+
+- tools/（辅助分析工具）
+- gates/（自动检查 gates）
+- AST 解析
+- git diff 自动检查
+- multi-agent harness
+- 自动化脚本
+- 自动判断代码是否越界
+
+---
+
 ## v1.1.1 (2024-05-24)
 
 ### Release Summary
