@@ -17,7 +17,7 @@ RR Skill 通过四个阶段治理 AI 的代码修改行为：
 
 - `rr verify` 输出依赖 AI 自查，**仍然需要人工审查**
 - **PASS 不代表业务完全正确**，只代表边界检查通过
-- **WARNING 必须人工验证后才能决定是否提交**
+- **WARNING 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查**
 - 如果存在 Unverified Items，状态不能是 PASS，只能是 WARNING 或 FAIL
 - 未列入 Allowed 的新增文件一律 FAIL
 - Implement 阶段禁止重新解释需求（检查 LAST_LOCKED_PLAN.md）

@@ -85,7 +85,7 @@ none → analyze (DRAFT) → analyze (LOCKED) → commit → implement → verif
 1. **禁止跳跃阶段**：必须按顺序 transition
 2. **禁止 implement 阶段重新解释需求**：检查 LAST_LOCKED_PLAN.md
 3. **每次阶段变化必须更新此文件**
-4. **FAIL 状态必须回滚到 analyze**
+4. **FAIL 状态必须停止，并根据风险决定回滚或返回 rr analyze**
 
 ---
 
