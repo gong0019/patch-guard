@@ -111,13 +111,13 @@
 
 ## Recommendation
 
-### Status Definition (v1.1)
+### Status Definition (v2.0)
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 可提交 |
-| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ **必须人工验证后才能提交** |
-| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须回滚，返回 Phase 1 |
+| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 边界检查通过，可进入提交前人工审查 |
+| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查 |
+| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须停止，并根据风险决定回滚或返回 rr analyze |
 
 ### Hard Rule
 
@@ -125,9 +125,9 @@
 
 ### Final Recommendation
 
-- [PASS]: 边界检查通过，可提交
-- [WARNING]: 边界检查通过，但存在未验证项，**必须人工验证后才能提交**
-- [FAIL]: 边界检查失败，必须回滚并返回 Phase 1
+- PASS：边界检查通过，可进入提交前人工审查
+- WARNING：必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查
+- FAIL：必须停止，并根据风险决定回滚或返回 rr analyze
 
 ---
 

@@ -111,13 +111,13 @@ WARNING
 
 ## Recommendation
 
-### Status Definition (v1.1)
+### Status Definition (v2.0)
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 可提交 |
-| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ **必须人工验证后才能提交** |
-| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须回滚，返回 Phase 1 |
+| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 边界检查通过，可进入提交前人工审查 |
+| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查 |
+| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须停止，并根据风险决定回滚或返回 rr analyze |
 
 ### Hard Rule
 
@@ -127,7 +127,8 @@ WARNING
 
 **WARNING**: 边界检查通过，但存在 4 个未验证项。
 
-**必须人工验证以下内容后才能提交**：
+**必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查**：
+
 1. 编辑页面在其他产品类型下的回显
 2. 保存后数据库数据完整性
 3. 其他使用 variants 的页面组件是否受影响
@@ -139,4 +140,4 @@ WARNING
 
 - BOUNDARY.md: v1
 - TASK_PACKET.md: v1
-- Generated: 2024-05-24 11:30 (v1.1 updated)
+- Generated: 2024-05-24 11:30 (v2.0-alpha.1 updated)

@@ -24,15 +24,15 @@
 
 当前 patch 已完成，VERIFY_REPORT 状态为 WARNING。
 
-**人工验证后可提交。**
+**必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查。**
 
 ---
 
 ## Next Steps
 
 1. 人工验证 Unverified Items
-2. 确认后可提交
-3. 提交后归档到 `.rr/archive/`
+2. 验证后决定是否进入提交前人工审查
+3. 如决定提交，提交后归档到 `.rr/archive/`
 
 ---
 

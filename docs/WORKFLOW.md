@@ -230,7 +230,8 @@ ANALYZE_REPORT.md (LOCKED)
 1. **如果存在 Unverified Items，状态不能是 PASS，只能是 WARNING 或 FAIL**
 2. **未列入 Allowed 的新增文件一律 FAIL**
 3. **PASS 不代表业务完全正确**，只代表边界检查通过
-4. **WARNING 必须人工验证后才能提交**
+4. **WARNING 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查**
+5. **FAIL 必须停止，并根据风险决定回滚或返回 rr analyze**
 
 ### Process
 
@@ -269,14 +270,14 @@ ANALYZE_REPORT.md (LOCKED)
 | Status | Condition | Action |
 |--------|-----------|--------|
 | PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 边界检查通过，可进入提交前人工审查 |
-| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ **必须人工验证后才能决定是否提交** |
-| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须停止并返回 rr analyze |
+| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查 |
+| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须停止，并根据风险决定回滚或返回 rr analyze |
 
 ### Important Notes
 
 - **PASS 不代表业务完全正确**，只代表边界检查通过，仍需人工审查
-- **WARNING 必须人工验证后才能决定是否提交**
-- **FAIL 必须停止并返回 rr analyze**
+- **WARNING 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查**
+- **FAIL 必须停止，并根据风险决定回滚或返回 rr analyze**
 
 ---
 
@@ -383,12 +384,12 @@ none → analyze (DRAFT) → analyze (LOCKED) → commit → implement → verif
 3. 有疑问立即停止，不要继续
 4. **禁止新增未列入 Allowed 的文件**
 
-### Verify 阶段 (v1.1)
+### Verify 阶段 (v2.0)
 
 1. 认真检查 VERIFY_REPORT.md
 2. **PASS 不代表业务完全正确**，仍需人工审查
-3. **WARNING 必须人工验证后才能提交**
-4. **FAIL 必须回滚并返回 Phase 1**
+3. **WARNING 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查**
+4. **FAIL 必须停止，并根据风险决定回滚或返回 rr analyze**
 5. 检查 Unverified Items，存在时状态不能是 PASS
 
 ---
@@ -400,7 +401,7 @@ none → analyze (DRAFT) → analyze (LOCKED) → commit → implement → verif
 | 跳过 Analyze | 修改范围失控 | 坚持先分析后修改 |
 | 单轮确认 | 边界不准确 | 多轮校对 |
 | 忽略 Stop Conditions | 引入 regression | 立即停止并报告 |
-| FAIL 后继续提交 | 破坏系统 | 必须回滚重新分析 |
+| FAIL 后继续提交 | 破坏系统 | 必须停止，根据风险决定回滚或返回 rr analyze |
 
 ---
 
@@ -411,4 +412,4 @@ none → analyze (DRAFT) → analyze (LOCKED) → commit → implement → verif
 | Analyze | 禁止改代码，先分析 |
 | Commit | 锁定计划，禁止变轨 |
 | Implement | 只改 Allowed，遵守边界 |
-| Verify | PASS 可进入人工审查；WARNING 必须人工验证；FAIL 必须回滚 |
+| Verify | PASS 可进入人工审查；WARNING 必须验证后决定；FAIL 必须停止并根据风险决定 |

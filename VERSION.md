@@ -1,5 +1,66 @@
 # RR Skill Version Log
 
+## Historical Records Notice
+
+**历史版本只作为 changelog，不作为当前行为规则。**
+
+当前行为规则只以最新版本和 `RR_SKILL.md` 为准。
+
+历史版本中的状态定义、表述可能已过时，请参考最新版本。
+
+---
+
+## v2.0-alpha.1 (2024-05-24)
+
+### Release Summary
+
+V2-alpha 文案一致性修正，不增加新功能。
+
+**修正内容**：
+- 统一 PASS / WARNING / FAIL 的当前语义
+- 移除"PASS 可提交"的误导表达
+- 移除"WARNING 验证后必然可提交"的误导表达
+- 将"FAIL 必须回滚"改为"FAIL 必须停止，并根据风险决定回滚或返回 rr analyze"
+
+---
+
+### Fixes
+
+#### Status Definition 统一 (v2.0)
+
+| Status | Action (v2.0) |
+|--------|---------------|
+| PASS | 边界检查通过，可进入提交前人工审查 |
+| WARNING | 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查 |
+| FAIL | 必须停止，并根据风险决定回滚或返回 rr analyze |
+
+**消除表述**：
+- ❌ "PASS 可提交"
+- ❌ "PASS 边界检查通过，可提交"
+- ❌ "WARNING 必须人工验证后才能提交"
+- ❌ "WARNING 验证后提交"
+- ❌ "FAIL 必须回滚"
+- ❌ "FAIL 必须回滚并返回 Phase 1"
+
+**替换表述**：
+- ✅ "PASS：边界检查通过，可进入提交前人工审查"
+- ✅ "WARNING：必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查"
+- ✅ "FAIL：必须停止，并根据风险决定回滚或返回 rr analyze"
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| templates/VERIFY_REPORT.md | Status Definition 表述统一 |
+| .rr-example/current/VERIFY_REPORT.md | 示例表述统一 |
+| docs/WORKFLOW.md | Verify 阶段、Summary 表表述统一 |
+| .rr-example/state/CURRENT_STATE.md | "人工验证后可提交"改为正确表述 |
+| VERSION.md | 历史版本声明、v2.0-alpha.1 记录 |
+
+---
+
 ## v2.0-alpha (2024-05-24)
 
 ### Release Summary
