@@ -7,7 +7,7 @@
 **本文件是历史需求文档，不是当前执行规则。**
 
 当前执行规则以以下文件为准：
-- `RR_SKILL.md` - 核心 Skill Prompt 规范
+- `SKILL.md` - 核心 Skill Prompt 规范
 - `templates/` - 模板文件
 - `docs/WORKFLOW.md` - 详细工作流说明
 - `VERSION.md` - 版本记录

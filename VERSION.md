@@ -4,9 +4,28 @@
 
 **历史版本只作为 changelog，不作为当前行为规则。**
 
-当前行为规则只以最新版本和 `RR_SKILL.md` 为准。
+当前行为规则只以最新版本和 `SKILL.md` 为准。
 
 历史版本中的状态定义、表述可能已过时，请参考最新版本。
+
+---
+
+## v2.0-alpha.5 (2024-05-24): Skill File Rename
+
+### Release Summary
+
+重命名 `RR_SKILL.md` → `SKILL.md`，符合 Claude Code skills 目录命名规范。
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| RR_SKILL.md → SKILL.md | 重命名，Claude Code 查找 SKILL.md |
+| README.md | 更新引用 RR_SKILL.md → SKILL.md |
+| VERSION.md | 更新引用 RR_SKILL.md → SKILL.md |
+| RR_Skill_Requirement.md | 更新历史文档中的引用 |
 
 ---
 
@@ -98,7 +117,7 @@ Only human-confirmed candidates can become active PATCH_RULES.
 
 | File | Change |
 |------|--------|
-| RR_SKILL.md Promote Criteria | Human Confirmation 是唯一 mandatory，其他是 evidence |
+| SKILL.md Promote Criteria | Human Confirmation 是唯一 mandatory，其他是 evidence |
 | docs/WORKFLOW.md Promote Criteria | 同步语义修正 |
 | templates/PATCH_RULES.md Important | 修正 "只有符合以下条件才写入" 表述 |
 | templates/PATCH_RULES.md Promotion Checklist | 区分 Mandatory / Evidence / Blockers |
@@ -192,7 +211,7 @@ PATCH_RULES promote 机制治理修正，明确 AI 不能自行 promote。
 | File | Change |
 |------|--------|
 | templates/PATCH_RULES.md | 增加核心原则、定义、RR Candidate 模板、Promotion Checklist、Do Not Promote |
-| RR_SKILL.md Promote Rule | 明确 AI 不能自行 promote |
+| SKILL.md Promote Rule | 明确 AI 不能自行 promote |
 | docs/WORKFLOW.md Promote Rule | 明确 AI 只能生成 Candidate，Human 决策 |
 | .rr-example/rules/PATCH_RULES.md | 区分 Promoted Rules 和 RR Candidates |
 
@@ -202,11 +221,11 @@ PATCH_RULES promote 机制治理修正，明确 AI 不能自行 promote。
 
 ### Release Summary
 
-Single Source of Truth 修正，消除 RR_SKILL.md、templates/、docs/WORKFLOW.md 之间的模板漂移。
+Single Source of Truth 修正，消除 SKILL.md、templates/、docs/WORKFLOW.md 之间的模板漂移。
 
 **核心变更**：
 - templates/ 作为报告结构单一来源
-- RR_SKILL.md 只保留行为规则，不重复内嵌完整模板
+- SKILL.md 只保留行为规则，不重复内嵌完整模板
 - WORKFLOW.md 同步 v2.0 Output 结构
 
 ---
@@ -215,16 +234,16 @@ Single Source of Truth 修正，消除 RR_SKILL.md、templates/、docs/WORKFLOW.
 
 #### Template Drift Fix
 
-RR_SKILL.md 与 templates/ 存在重复定义和不一致：
+SKILL.md 与 templates/ 存在重复定义和不一致：
 
 **Before**：
-- RR_SKILL.md 内嵌完整旧模板（v1.0/v1.1 结构）
+- SKILL.md 内嵌完整旧模板（v1.0/v1.1 结构）
 - templates/ 已升级到 v2.0 Problem-Focused
 - docs/WORKFLOW.md 仍写 v1.1 结构
 
 **After**：
 - templates/ 作为报告结构单一来源
-- RR_SKILL.md 只保留行为规则 + Output Structure 表格
+- SKILL.md 只保留行为规则 + Output Structure 表格
 - WORKFLOW.md 同步 v2.0 结构
 
 #### Phase 1 Output Structure (v2.0)
@@ -263,8 +282,8 @@ RR_SKILL.md 与 templates/ 存在重复定义和不一致：
 
 | File | Change |
 |------|--------|
-| RR_SKILL.md Phase 1 | 移除内嵌模板，改为 Output Structure 表格 + Problem Understanding 优先规则 |
-| RR_SKILL.md Phase 4 | 移除内嵌模板，改为 Output Structure 表格 + Fix Verification 优先规则 |
+| SKILL.md Phase 1 | 移除内嵌模板，改为 Output Structure 表格 + Problem Understanding 优先规则 |
+| SKILL.md Phase 4 | 移除内嵌模板，改为 Output Structure 表格 + Fix Verification 优先规则 |
 | docs/WORKFLOW.md Phase 1 | Output 表格更新为 v2.0，增加 Problem Understanding First |
 | docs/WORKFLOW.md Phase 4 | Output 表格从 v1.1 更新为 v2.0，增加 Fix Verification First |
 | docs/QUICK_START.md | 增加 Problem-Focused Governance 说明 |
@@ -346,7 +365,7 @@ Verify 阶段必须先确认原始问题是否被修复：
 
 | File | Change |
 |------|--------|
-| RR_SKILL.md | 增加 Core Principle、Minimum Sufficient Artifact、修正 WARNING 表述 |
+| SKILL.md | 增加 Core Principle、Minimum Sufficient Artifact、修正 WARNING 表述 |
 | templates/ANALYZE_REPORT.md | 增加 Problem Understanding 部分 |
 | templates/VERIFY_REPORT.md | 增加 Fix Verification 部分 |
 | .rr-example/current/ANALYZE_REPORT.md | 增加 Problem Understanding 示例 |
@@ -536,7 +555,7 @@ patch 完成后归档流程：
 | .rr-example/state/CURRENT_STATE.md | New | 示例状态文件 |
 | .rr-example/state/LAST_LOCKED_PLAN.md | New | 示例锁定计划 |
 | .rr-example/archive/README.md | New | 归档规范说明 |
-| RR_SKILL.md | Modified | 增加 state/rules/archive 说明 |
+| SKILL.md | Modified | 增加 state/rules/archive 说明 |
 | docs/QUICK_START.md | Modified | 增加目录说明、统一表述 |
 | docs/WORKFLOW.md | Modified | 增加状态文件说明、promote 规则 |
 | VERSION.md | Modified | v2.0-alpha 记录 |
@@ -672,7 +691,7 @@ v1.1:
 
 #### 4. V1 Limitations 说明
 
-在 RR_SKILL.md、QUICK_START.md、WORKFLOW.md 中明确说明：
+在 SKILL.md、QUICK_START.md、WORKFLOW.md 中明确说明：
 - **V1 是 Prompt Protocol，不是自动验证工具**
 - **rr verify 仍然需要人工审查**
 - **PASS 不代表业务完全正确**，只代表边界检查通过
@@ -690,7 +709,7 @@ v1.1:
 
 | File | Change |
 |------|--------|
-| RR_SKILL.md | Phase 4 状态定义修复、BOUNDARY.md Format 更新、Hard Rules 增加 |
+| SKILL.md | Phase 4 状态定义修复、BOUNDARY.md Format 更新、Hard Rules 增加 |
 | templates/VERIFY_REPORT.md | 增加 Evidence、Manual Verification Required、Final Recommendation |
 | templates/BOUNDARY.md | 增加 Allowed New Files 部分、New Files Rule |
 | .rr-example/current/VERIFY_REPORT.md | 状态改为 WARNING、增加新字段 |
@@ -818,7 +837,7 @@ v1.0.0 的状态定义和规则已被 v1.1.0 修正，请参考最新版本。
 
 ```
 PatchGuard/
-├── RR_SKILL.md                    # 核心 Skill Prompt 规范
+├── SKILL.md                    # 核心 Skill Prompt 规范
 │                                  # - Role Definition
 │                                  # - Trigger Keywords
 │                                  # - Four Phase Details
@@ -1024,7 +1043,7 @@ PatchGuard/
 |------|--------|
 | 模板格式符合需求文档规范 | ✅ |
 | .rr-example 包含完整工作流文件 | ✅ |
-| RR_SKILL.md 定义四阶段流程 | ✅ |
+| SKILL.md 定义四阶段流程 | ✅ |
 | LOCKED_PLAN 机制完整描述 | ✅ |
 | BOUNDARY.md 包含四个核心部分 | ✅ |
 | VERIFY_REPORT.md 包含三状态判定 | ✅ |
@@ -1054,10 +1073,10 @@ mkdir -p .rr/rules .rr/current
 # 2. 复制模板（可选，AI 也会自动生成）
 cp templates/*.md .rr/current/
 
-# 3. 在 AI 工具中加载 RR_SKILL.md
+# 3. 在 AI 工具中加载 SKILL.md
 # Claude Code: 添加到 CLAUDE.md
 # Cursor: 添加到 .cursorrules
-# Copilot: 对话中发送 RR_SKILL.md 内容
+# Copilot: 对话中发送 SKILL.md 内容
 
 # 4. 开始使用
 # 输入: RR 分析：[问题描述]
