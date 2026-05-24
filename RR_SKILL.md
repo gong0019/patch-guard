@@ -96,50 +96,36 @@ AI 输出 ANALYZE_REPORT.md (v2/v3...)
 进入 Phase 2
 ```
 
-### Output Format
+### Output
 
-生成 `.rr/current/ANALYZE_REPORT.md`：
+生成 `.rr/current/ANALYZE_REPORT.md`，严格遵循 `templates/ANALYZE_REPORT.md`。
 
-```markdown
-# RR Analyze Report
+**Output Structure (v2.0)**：
 
-## Status
-[DRAFT / LOCKED]
+| Section | Required | Priority |
+|---------|----------|----------|
+| Problem Understanding | ✅ | **First** - 必须先填写 |
+| Problem Classification | ✅ | Second |
+| Impact Radius | ✅ | Third |
+| Regression Detection | ✅ | Fourth |
+| Risk Analysis | ✅ | Fifth |
+| Minimal Fix Strategy | ✅ | Sixth |
+| Version History | ✅ | Last |
 
-## Problem
-[用户原始问题描述]
+### Hard Rule: Problem Understanding First
 
-## Problem Classification
-[UI Bug / State Bug / Logic Bug / Save Pipeline Bug / Render Bug / Workflow Bug / Architecture Bug / Regression]
+Analyze 阶段第一目标不是分类，而是确认问题本身。
 
-## Impact Radius
-涉及:
-- [file/module 1]
-- [file/module 2]
+必须先填写 Problem Understanding：
+- User Report（用户原始描述）
+- Current Wrong Behavior（当前错误行为）
+- Expected Behavior（期望行为）
+- Confirmation Needed（需要确认的点）
 
-不涉及:
-- [file/module 1]
-- [file/module 2]
+**如果 Problem Understanding 未填写清楚，禁止进入 Problem Classification。**
 
-## Regression Detection
-[New Issue / Known Regression / Requirement Change / Architecture Defect]
-
-## Risk Analysis
-可能误伤:
-- [risk 1]
-- [risk 2]
-
-关联已有 RR: [RR-XXX / 无]
-
-## Minimal Fix Strategy
-[描述最小修改方案，禁止大范围重构]
-
-## Version History
-v1: [initial analysis timestamp]
-v2: [user correction: ...]
-v3: [user补充: ...]
-LOCKED: [timestamp] (仅在用户确认后添加)
-```
+用户确认前状态必须是 **DRAFT**。
+用户确认后状态才是 **LOCKED**。
 
 ### If Problem Cannot Be Fixed Locally
 
@@ -412,96 +398,66 @@ Behaviors:
 
 ### Objective
 
-检查修改是否符合边界约束。
+确认原始问题是否被修复，检查修改是否符合边界约束。
 
-**重要提示**：V1 是 Prompt Protocol，不是自动验证工具。rr verify 仍然需要人工审查。
+**重要提示**：V2-alpha 是 Prompt Protocol，不是自动验证工具。rr verify 仍然需要人工审查。
 
 ### Trigger
 
 用户输入 `RR 验证` / `rr verify`
 
-### Hard Rules (v1.1)
+### Hard Rules (v2.0)
 
-1. **如果存在 Unverified Items，状态不能是 PASS，只能是 WARNING 或 FAIL**
-2. **未列入 Allowed 的新增文件一律 FAIL**
-3. **PASS 不代表业务完全正确，只代表边界检查通过**
-4. **WARNING 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查**
-5. **FAIL 必须停止，并根据风险决定回滚或返回 rr analyze**
+1. **必须先填写 Fix Verification**，再检查边界合规
+2. **如果 Fix Result 不是 Fixed，Status 不能是 PASS**
+3. **如果存在 Unverified Items，Status 不能是 PASS，只能是 WARNING 或 FAIL**
+4. **未列入 Allowed 的新增文件一律 FAIL**
+5. **PASS 不代表业务完全正确**，只代表边界检查通过且没有未验证关键项
+6. **WARNING 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查**
+7. **FAIL 必须停止，并根据风险决定回滚或返回 rr analyze**
 
 ### Output
 
-生成 `.rr/current/VERIFY_REPORT.md`：
+生成 `.rr/current/VERIFY_REPORT.md`，严格遵循 `templates/VERIFY_REPORT.md`。
 
-```markdown
-# RR Verify Report
+**Output Structure (v2.0)**：
 
-## Status
-[PASS / WARNING / FAIL]
+| Section | Required | Priority |
+|---------|----------|----------|
+| Fix Verification | ✅ | **First** - 必须先填写 |
+| Modified Files | ✅ | Second |
+| New Files Created | ✅ | Third |
+| Boundary Check | ✅ | Fourth |
+| Unverified Items | ✅ | Fifth |
+| Evidence | ✅ | Sixth |
+| Manual Verification Required | ✅ | Seventh |
+| Risks | ✅ | Eighth |
+| Final Recommendation | ✅ | Last |
 
-## Modified Files
-- [file 1]: [changes summary]
-- [file 2]: [changes summary]
+### Hard Rule: Fix Verification First
 
-## New Files Created
-- [new file 1]: ✅ in Allowed Files / ❌ NOT in Allowed Files
-Result: [✅ all new files in Allowed / ❌ X new file(s) NOT in Allowed]
+Verify 阶段第一目标不是边界检查，而是确认原始问题是否被修复。
 
-## Boundary Check
+必须先填写 Fix Verification：
+- Original Problem（原始问题）
+- Expected Behavior（期望行为）
+- Actual Behavior After Patch（修改后实际行为）
+- Verification Method（验证方法）
+- Fix Result: Fixed / Not Fixed / Partially Fixed / Unknown
 
-### Allowed Files Check
-- [file 1]: ✅ in allowed
-- [file 2]: ✅ in allowed
-- [file 3]: ❌ NOT in allowed (if any)
-Result: [✅ all in allowed / ❌ X file(s) out of allowed]
-
-### Forbidden Files Check
-- [file X]: ✅ not touched / ❌ TOUCHED
-Result: [✅ none touched / ❌ touched: ...]
-
-### Forbidden Behaviors Check
-- 重构: ✅ none / ❌ detected
-- 优化: ✅ none / ❌ detected
-- 架构改动: ✅ none / ❌ detected
-Result: [✅ none / ❌ detected: ...]
-
-## Unverified Items
-- [item 1]: [需要验证的内容]
-- [item 2]: [需要验证的内容]
-
-## Evidence
-| Evidence Type | Source | Details |
-|---------------|--------|---------|
-| Diff Source | [git diff / 手动记录] | [具体来源] |
-| Modified Lines | [行数范围] | [修改行号] |
-| Review Method | [AI 自查 / 人工审查] | [审查方式] |
-
-## Manual Verification Required
-| Item | Reason | Priority |
-|------|--------|----------|
-| [项目 1] | [需要人工验证的原因] | High / Medium / Low |
-
-## Risks
-- [risk 1]
-- [risk 2]
-
-## Final Recommendation
-
-- PASS: 边界检查通过，可进入提交前人工审查
-- WARNING: 边界检查通过，但存在未验证项，**必须人工验证后才能决定是否提交**
-- FAIL: 边界检查失败，必须停止并返回 rr analyze
-```
+**如果 Fix Result 不是 Fixed，VERIFY_REPORT 不能是 PASS。**
 
 ### Status Definition (v2.0)
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 边界检查通过，可进入提交前人工审查 |
-| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ **必须人工验证后才能决定是否提交** |
-| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须停止并返回 rr analyze |
+| PASS | Fix Result=Fixed、无越界、无 Forbidden、**无未验证关键项** | ✅ 边界检查通过，可进入提交前人工审查 |
+| WARNING | 无越界、无 Forbidden，**但存在未验证项或 Fix Result=Partially Fixed** | ⚠️ **必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查** |
+| FAIL | Fix Result=Not Fixed/Unknown、触碰 Forbidden、超出 Allowed、违反 Locked Plan | ❌ 必须停止，并根据风险决定回滚或返回 rr analyze |
 
 ### Important Notes
 
-- **PASS 不代表业务完全正确**，只代表边界检查通过，仍需人工审查
+- **PASS 不代表业务完全正确**，只代表边界检查通过且问题初步修复确认，仍需人工审查
 - **WARNING 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查**
 - **FAIL 必须停止，并根据风险决定回滚或返回 rr analyze**
 
@@ -579,16 +535,46 @@ none → analyze (DRAFT) → analyze (LOCKED) → commit → implement → verif
 
 ## Promote Rule (v2.0)
 
+### Core Principle
+
+**AI may propose RR Candidates, but only human-confirmed rules can be promoted to PATCH_RULES.**
+
 **不是每个 bug 都写入长期规则。**
+
+### Process
+
+```
+bug fixed → VERIFY_REPORT 完成 → AI 生成 RR Candidate → Human 决策 → Promote / Reject / Defer
+```
+
+### Hard Rules
+
+1. **AI 只能生成 RR Candidate**
+2. **AI 不能自行 promote**
+3. **只有 Human 明确确认 Promote 后，规则才能进入长期 PATCH_RULES**
+4. **Reject / Defer 不得成为 active rule**
+5. **如果 Human 未确认 Promote，Candidate 必须保持 inactive**
+
+### Promote Criteria
 
 只有符合以下条件才写入 `.rr/rules/PATCH_RULES.md`：
 
 | Criterion | Required | Description |
 |-----------|----------|-------------|
-| Severity | High / Critical | 是否影响核心功能 |
-| Pattern | Yes | 是否为典型错误模式 |
-| Recurrence Risk | High | 其他 AI 是否可能重犯 |
-| User Confirmation | Required | 用户必须明确确认 |
+| Major Regression | Yes | 是否导致数据丢失/崩溃/核心功能失效 |
+| Typical Error Pattern | Yes | 是否为典型 AI patch 错误 |
+| Core Module | Yes (human confirmed) | 是否为核心模块（需 Human 确认） |
+| Human Confirmation | Required | Human 必须明确确认 Promote |
+
+### Do Not Promote
+
+- Bug is one-off
+- Rule is vague
+- Rule only describes this exact patch
+- Rule cannot guide future patches
+- Rule duplicates existing rule
+- No human confirmation
+- Only evidence is AI speculation
 
 **禁止将一次性 bug、低风险修复、简单 typo 写入长期规则。**
 

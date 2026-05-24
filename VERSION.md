@@ -10,6 +10,172 @@
 
 ---
 
+## v2.0-alpha.3 补充 (2024-05-24): PATCH_RULES Promote Governance
+
+### Release Summary
+
+PATCH_RULES promote 机制治理修正，明确 AI 不能自行 promote。
+
+**核心原则**：
+- AI may propose RR Candidates, but only human-confirmed rules can be promoted to PATCH_RULES.
+
+---
+
+### Fixes
+
+#### Core Principle Added
+
+**AI 只能生成 RR Candidate，不能自行 promote 到 PATCH_RULES。**
+
+只有 Human 明确确认 Promote 后，规则才能进入长期 PATCH_RULES。
+
+#### Definition Added
+
+**Major Regression**：
+- Data loss
+- Incorrect database write
+- Broken save pipeline
+- Broken render pipeline for core page
+- Authentication / permission / payment / order flow failure
+- Irreversible state corruption
+- Production-blocking error
+
+**Typical Error Pattern**：
+- Template changed but JS state not updated
+- Update path fixed but insert path missed
+- Render fixed but save pipeline missed
+- Create/copy mode missed
+- Local bug fixed by unrelated refactor
+- Patch scope expanded beyond locked boundary
+- Verification claims fixed but no evidence was provided
+
+**Core Module**：
+- AI must not assume a module is core
+- A module is core only if listed in `.rr/rules/CORE_MODULES.md` or confirmed by human
+
+#### RR Candidate Template Added
+
+每个 Candidate 必须包含：
+- Candidate ID
+- Source Patch
+- Original Problem
+- Proposed Rule
+- Evidence
+- Promotion Criteria Matched
+- Duplicate Check
+- Human Decision: Promote / Reject / Defer
+- Decision Reason
+
+#### Promotion Checklist Added
+
+| Criterion | Yes/No | Evidence |
+|-----------|--------|----------|
+| Has this error happened before? | | |
+| Did it cause data loss, crash, or core feature failure? | | |
+| Is it likely to recur in similar patches? | | |
+| Is the affected module explicitly marked as core? | | |
+| Would this rule prevent future scope creep or patch explosion? | | |
+| Is the rule specific and actionable? | | |
+| Does it duplicate an existing rule? | | |
+| Is it too narrow or one-off? | | |
+
+#### Do Not Promote Added
+
+- The bug is one-off
+- The rule is vague
+- The rule only describes this exact patch
+- The rule cannot guide future patches
+- The rule duplicates an existing rule
+- There is no human confirmation
+- The only evidence is AI speculation
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| templates/PATCH_RULES.md | 增加核心原则、定义、RR Candidate 模板、Promotion Checklist、Do Not Promote |
+| RR_SKILL.md Promote Rule | 明确 AI 不能自行 promote |
+| docs/WORKFLOW.md Promote Rule | 明确 AI 只能生成 Candidate，Human 决策 |
+| .rr-example/rules/PATCH_RULES.md | 区分 Promoted Rules 和 RR Candidates |
+
+---
+
+## v2.0-alpha.3 (2024-05-24)
+
+### Release Summary
+
+Single Source of Truth 修正，消除 RR_SKILL.md、templates/、docs/WORKFLOW.md 之间的模板漂移。
+
+**核心变更**：
+- templates/ 作为报告结构单一来源
+- RR_SKILL.md 只保留行为规则，不重复内嵌完整模板
+- WORKFLOW.md 同步 v2.0 Output 结构
+
+---
+
+### Fixes
+
+#### Template Drift Fix
+
+RR_SKILL.md 与 templates/ 存在重复定义和不一致：
+
+**Before**：
+- RR_SKILL.md 内嵌完整旧模板（v1.0/v1.1 结构）
+- templates/ 已升级到 v2.0 Problem-Focused
+- docs/WORKFLOW.md 仍写 v1.1 结构
+
+**After**：
+- templates/ 作为报告结构单一来源
+- RR_SKILL.md 只保留行为规则 + Output Structure 表格
+- WORKFLOW.md 同步 v2.0 结构
+
+#### Phase 1 Output Structure (v2.0)
+
+| Section | Required | Priority |
+|---------|----------|----------|
+| Problem Understanding | ✅ | **First** |
+| Problem Classification | ✅ | Second |
+| Impact Radius | ✅ | Third |
+| Regression Detection | ✅ | Fourth |
+| Risk Analysis | ✅ | Fifth |
+| Minimal Fix Strategy | ✅ | Sixth |
+| Version History | ✅ | Last |
+
+**硬规则**：Problem Understanding 未填写清楚，禁止进入 Problem Classification。
+
+#### Phase 4 Output Structure (v2.0)
+
+| Section | Required | Priority |
+|---------|----------|----------|
+| Fix Verification | ✅ | **First** |
+| Modified Files | ✅ | Second |
+| New Files Created | ✅ | Third |
+| Boundary Check | ✅ | Fourth |
+| Unverified Items | ✅ | Fifth |
+| Evidence | ✅ | Sixth |
+| Manual Verification Required | ✅ | Seventh |
+| Risks | ✅ | Eighth |
+| Final Recommendation | ✅ | Last |
+
+**硬规则**：Fix Result 不是 Fixed，VERIFY_REPORT 不能是 PASS。
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| RR_SKILL.md Phase 1 | 移除内嵌模板，改为 Output Structure 表格 + Problem Understanding 优先规则 |
+| RR_SKILL.md Phase 4 | 移除内嵌模板，改为 Output Structure 表格 + Fix Verification 优先规则 |
+| docs/WORKFLOW.md Phase 1 | Output 表格更新为 v2.0，增加 Problem Understanding First |
+| docs/WORKFLOW.md Phase 4 | Output 表格从 v1.1 更新为 v2.0，增加 Fix Verification First |
+| docs/QUICK_START.md | 增加 Problem-Focused Governance 说明 |
+| VERSION.md | v2.0-alpha.3 记录 |
+
+---
+
 ## v2.0-alpha.2 (2024-05-24)
 
 ### Release Summary

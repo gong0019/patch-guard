@@ -68,20 +68,35 @@ AI 迭代更新 (v2, v3, ...)
 | 禁止架构建议 | 不提出架构优化或重构建议 |
 | 必须多轮校对 | 用户纠正后必须迭代更新 |
 
-### Output: ANALYZE_REPORT.md
+### Output: ANALYZE_REPORT.md (v2.0)
 
 包含以下内容：
 
-| Section | Description |
-|---------|-------------|
-| Status | DRAFT 或 LOCKED |
-| Problem | 用户原始问题 |
-| Classification | 问题类型分类 |
-| Impact Radius | 涉及和不涉及的文件/模块 |
-| Regression | 是否已知回归问题 |
-| Risk Analysis | 可能误伤的模块 |
-| Minimal Fix Strategy | 最小修改方案描述 |
-| Version History | 多轮校对记录 |
+| Section | Required | Priority | Description |
+|---------|----------|----------|-------------|
+| Problem Understanding | ✅ | **First** | 确认问题本身 |
+| Problem Classification | ✅ | Second | 问题类型分类 |
+| Impact Radius | ✅ | Third | 涉及和不涉及的文件/模块 |
+| Regression Detection | ✅ | Fourth | 是否已知回归问题 |
+| Risk Analysis | ✅ | Fifth | 可能误伤的模块 |
+| Minimal Fix Strategy | ✅ | Sixth | 最小修改方案描述 |
+| Version History | ✅ | Last | 多轮校对记录 |
+
+### Hard Rule: Problem Understanding First
+
+Analyze 阶段第一目标不是分类，而是确认问题本身：
+
+- 当前错误行为是什么
+- 期望行为是什么
+- 用户是否确认
+
+必须先填写 Problem Understanding：
+- User Report
+- Current Wrong Behavior
+- Expected Behavior
+- Confirmation Needed
+
+**如果 Problem Understanding 未填写清楚，禁止进入 Problem Classification。**
 
 ### Escalate
 
@@ -251,31 +266,44 @@ ANALYZE_REPORT.md (LOCKED)
 输出 VERIFY_REPORT.md
 ```
 
-### Output: VERIFY_REPORT.md (v1.1)
+### Output: VERIFY_REPORT.md (v2.0)
 
-| Section | Description |
-|---------|-------------|
-| Status | PASS / WARNING / FAIL |
-| Modified Files | 实际修改的文件列表 |
-| New Files Created | 新增文件及其 Allowed 状态 |
-| Boundary Check | Allowed/Forbidden 检查结果 |
-| Unverified Items | 尚未验证的内容（存在时不能 PASS） |
-| Evidence | 修改证据记录 |
-| Manual Verification Required | 需人工验证的项目 |
-| Risks | 风险项列表 |
-| Final Recommendation | 提交建议 |
+| Section | Required | Priority | Description |
+|---------|----------|----------|-------------|
+| Fix Verification | ✅ | **First** | 确认原始问题是否被修复 |
+| Modified Files | ✅ | Second | 实际修改的文件列表 |
+| New Files Created | ✅ | Third | 新增文件及其 Allowed 状态 |
+| Boundary Check | ✅ | Fourth | Allowed/Forbidden 检查结果 |
+| Unverified Items | ✅ | Fifth | 尚未验证的内容（存在时不能 PASS） |
+| Evidence | ✅ | Sixth | 修改证据记录 |
+| Manual Verification Required | ✅ | Seventh | 需人工验证的项目 |
+| Risks | ✅ | Eighth | 风险项列表 |
+| Final Recommendation | ✅ | Last | 提交建议 |
+
+### Hard Rule: Fix Verification First
+
+Verify 阶段第一目标不是边界检查，而是确认原始问题是否被修复。
+
+必须先填写 Fix Verification：
+- Original Problem
+- Expected Behavior
+- Actual Behavior After Patch
+- Verification Method
+- Fix Result: Fixed / Not Fixed / Partially Fixed / Unknown
+
+**如果 Fix Result 不是 Fixed，VERIFY_REPORT 不能是 PASS。**
 
 ### Status Definition (v2.0)
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 边界检查通过，可进入提交前人工审查 |
-| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查 |
-| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须停止，并根据风险决定回滚或返回 rr analyze |
+| PASS | Fix Result=Fixed、无越界、无 Forbidden、**无未验证关键项** | ✅ 边界检查通过，可进入提交前人工审查 |
+| WARNING | 无越界、无 Forbidden，**但存在未验证项或 Fix Result=Partially Fixed** | ⚠️ 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查 |
+| FAIL | Fix Result=Not Fixed/Unknown、触碰 Forbidden、超出 Allowed、违反 Locked Plan | ❌ 必须停止，并根据风险决定回滚或返回 rr analyze |
 
 ### Important Notes
 
-- **PASS 不代表业务完全正确**，只代表边界检查通过，仍需人工审查
+- **PASS 不代表业务完全正确**，只代表边界检查通过且问题初步修复确认，仍需人工审查
 - **WARNING 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查**
 - **FAIL 必须停止，并根据风险决定回滚或返回 rr analyze**
 
@@ -351,13 +379,34 @@ none → analyze (DRAFT) → analyze (LOCKED) → commit → implement → verif
 
 ## Promote Rule (v2.0)
 
+### Core Principle
+
+**AI may propose RR Candidates, but only human-confirmed rules can be promoted to PATCH_RULES.**
+
 **不是每个 bug 都写入长期规则。**
 
+### Process
+
+patch 完成后：
+- AI 可以建议 RR Candidate
+- 用户选择 Promote / Reject / Defer
+- 只有 Promote 才写入 `.rr/rules/PATCH_RULES.md`
+- Reject / Defer 不得成为 active rule
+
+### Hard Rules
+
+1. **AI 只能生成 RR Candidate**
+2. **AI 不能自行 promote**
+3. **只有 Human 明确确认 Promote 后，规则才能进入长期 PATCH_RULES**
+4. **如果 Human 未确认 Promote，Candidate 必须保持 inactive**
+
+### Promote Criteria
+
 只有符合以下条件才 promote：
-- Severity: High / Critical
-- Pattern: Yes（典型错误模式）
-- Recurrence Risk: High
-- User Confirmation: Required
+- Major Regression: Yes（数据丢失/崩溃/核心功能失效）
+- Typical Error Pattern: Yes
+- Core Module: Yes（需 Human 确认）
+- Human Confirmation: Required
 
 ---
 

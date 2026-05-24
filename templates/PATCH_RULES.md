@@ -6,51 +6,178 @@
 
 ---
 
+## Core Principle
+
+**AI may propose RR Candidates, but only human-confirmed rules can be promoted to PATCH_RULES.**
+
+PATCH_RULES.md should contain only active, human-confirmed regression rules.
+
+**禁止 AI 自行 promote**。AI 只能生成 RR Candidate，最终决策权在 Human。
+
+---
+
 ## Important: Not Every Bug Becomes a Rule
 
 **不是每个 bug 都写入 PATCH_RULES。**
 
 只有符合以下条件才写入：
-1. **重大 regression**：导致系统崩溃、数据丢失、核心功能失效
-2. **典型错误模式**：其他 AI 可能重犯的常见错误
-3. **核心模块**：修改风险高，需要特别提醒
+1. **重大 regression**
+2. **典型错误模式**
+3. **核心模块**
 
 **禁止**：将一次性 bug、低风险修复、简单 typo 写入长期规则。
+
+---
+
+## Definition: Major Regression
+
+Only count as major regression if it causes:
+
+- Data loss
+- Incorrect database write
+- Broken save pipeline
+- Broken render pipeline for a core page
+- Authentication / permission / payment / order flow failure
+- Irreversible state corruption
+- Production-blocking error
+
+**不包括**：
+- UI 显示小问题
+- 非核心页面样式问题
+- 文案错误
+- 一次性配置错误
+
+---
+
+## Definition: Typical Error Pattern
+
+Typical AI patch mistakes include:
+
+- Template changed but JS state not updated
+- Update path fixed but insert path missed
+- Render fixed but save pipeline missed
+- Create/copy mode missed
+- Local bug fixed by unrelated refactor
+- Patch scope expanded beyond locked boundary
+- Verification claims fixed but no evidence was provided
+
+---
+
+## Definition: Core Module
+
+AI must not assume a module is core.
+
+A module is core only if:
+- Listed in `.rr/rules/CORE_MODULES.md`
+- Or explicitly confirmed by human during RR Analyze / RR Commit
+
+If `CORE_MODULES.md` does not exist, AI may suggest a core module candidate, but cannot use "core module" as promotion evidence without human confirmation.
+
+---
+
+## Do Not Promote
+
+Do not promote if:
+
+- The bug is one-off
+- The rule is vague
+- The rule only describes this exact patch
+- The rule cannot guide future patches
+- The rule duplicates an existing rule
+- There is no human confirmation
+- The only evidence is AI speculation
+
+---
+
+## RR Candidate Template
+
+每个 RR Candidate 必须包含：
+
+```markdown
+## RR Candidate: C-XXX
+
+### Source Patch
+
+- Patch ID: [YYYY-MM-DD-patch-XXX]
+- Date: [date]
+
+### Original Problem
+
+[原始问题描述]
+
+### Proposed Rule
+
+修改 [module/file] 时：
+
+必须同步检查：
+- [相关模块 1]
+- [相关模块 2]
+
+禁止：
+- [禁止行为 1]
+
+### Evidence
+
+[具体 regression 描述]
+
+### Promotion Criteria Matched
+
+| Criterion | Matched? | Evidence |
+|-----------|----------|----------|
+| Major Regression? | Yes/No | [说明] |
+| Typical Error Pattern? | Yes/No | [说明] |
+| Core Module? | Yes/No | [说明] |
+
+### Duplicate Check
+
+- Existing RR Rules: [列出可能重复的规则]
+- Is Duplicate? | Yes/No |
+
+### Human Decision
+
+| Decision | Promote / Reject / Defer |
+|----------|--------------------------|
+| Decision By | [human name] |
+| Decision Date | [date] |
+| Decision Reason | [说明] |
+
+**Status**: [Candidate / Promoted / Rejected / Deferred]
+
+If Promoted, assigned RR ID: RR-XXX
+```
+
+---
+
+## Promotion Checklist
+
+| Criterion | Yes/No | Evidence |
+|-----------|--------|----------|
+| Has this error happened before? | | |
+| Did it cause data loss, crash, or core feature failure? | | |
+| Is it likely to recur in similar patches? | | |
+| Is the affected module explicitly marked as core? | | |
+| Would this rule prevent future scope creep or patch explosion? | | |
+| Is the rule specific and actionable? | | |
+| Does it duplicate an existing rule? | | |
+| Is it too narrow or one-off? | | |
 
 ---
 
 ## Promote Rule Process
 
 ```
-bug fixed → VERIFY_REPORT 完成 → 评估是否 promote → 用户确认 → 写入 PATCH_RULES
+bug fixed → VERIFY_REPORT 完成 → AI 生成 RR Candidate → Human 决策 → Promote / Reject / Defer
 ```
 
-### Promote Criteria
-
-| Criterion | Required | Description |
-|-----------|----------|-------------|
-| Severity | High / Critical | 是否影响核心功能 |
-| Pattern | Yes | 是否为典型错误模式 |
-| Recurrence Risk | High | 其他 AI 是否可能重犯 |
-| User Confirmation | Required | 用户必须明确确认 |
-
-### Promote Decision Template
-
-```markdown
-## Promote Decision
-
-| Criterion | Value | Notes |
-|-----------|-------|-------|
-| Severity | [High / Medium / Low] | [具体说明] |
-| Pattern | [Yes / No] | [是否典型模式] |
-| Recurrence Risk | [High / Medium / Low] | [复现风险评估] |
-| Decision | [Promote / Not Promote] | [最终决定] |
-| Reason | [说明] | [为什么 promote 或不 promote] |
-```
+**关键规则**：
+- AI 只能生成 RR Candidate
+- AI 不能自行 promote
+- 只有 Human 明确确认 Promote 后，规则才能进入长期 PATCH_RULES
+- Reject / Defer 不得成为 active rule
 
 ---
 
-## Rule Format
+## Promoted Rules Format
 
 ```markdown
 ## RR-XXX
@@ -69,12 +196,6 @@ bug fixed → VERIFY_REPORT 完成 → 评估是否 promote → 用户确认 →
 
 涉及 [功能] 时，禁止：
 - [禁止行为 1]
-- [禁止行为 2]
-
-### Must Do
-
-涉及 [功能] 时，必须：
-- [必须行为 1]
 
 ### Reason
 
@@ -83,6 +204,10 @@ bug fixed → VERIFY_REPORT 完成 → 评估是否 promote → 用户确认 →
 ### Severity
 
 [Critical / High / Medium]
+
+### Promoted By
+
+[Human name] on [date]
 
 ### Related Bugs
 
@@ -93,9 +218,17 @@ bug fixed → VERIFY_REPORT 完成 → 评估是否 promote → 用户确认 →
 
 ## Rule Index
 
-| RR | Scope | Severity | Summary |
-|----|-------|----------|---------|
-| RR-001 | [module] | [level] | [rule summary] |
+### Promoted Rules
+
+| RR | Scope | Severity | Summary | Promoted By |
+|----|-------|----------|---------|-------------|
+| RR-001 | [module] | [level] | [rule summary] | [human] |
+
+### RR Candidates (Not Promoted)
+
+| Candidate | Status | Proposed Rule | Human Decision |
+|-----------|--------|---------------|----------------|
+| C-XXX | Candidate | [rule summary] | Pending |
 
 ---
 
@@ -103,23 +236,12 @@ bug fixed → VERIFY_REPORT 完成 → 评估是否 promote → 用户确认 →
 
 | Stage | Description |
 |-------|-------------|
-| Created | 用户确认 promote 后创建 |
-| Active | 所有 patch 必须检查相关 RR |
+| Candidate | AI 提出，等待 Human 决策 |
+| Promoted | Human 确认，成为 active rule |
+| Rejected | Human 拒绝，不成为 active rule |
+| Deferred | Human 暂缓，待后续评估 |
 | Deprecated | 规则不再适用，标记 deprecated |
 | Removed | 确认无用后删除 |
-
----
-
-## Deprecated Rules
-
-已废弃规则保留在此，标记 `[DEPRECATED]`：
-
-```markdown
-## RR-XXX [DEPRECATED]
-
-Deprecated at: [timestamp]
-Reason: [废弃原因]
-```
 
 ---
 
@@ -128,6 +250,7 @@ Reason: [废弃原因]
 - 规则数量保持在精简范围（建议 < 20 条）
 - 规则必须有实际防止 regression 的价值
 - 定期 review 规则有效性
+- **AI 不能自行 promote**
 
 ---
 
