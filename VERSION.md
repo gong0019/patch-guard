@@ -10,6 +10,107 @@
 
 ---
 
+## v3.0.1 (2024-05-24): Explicit Invocation Override
+
+### Release Summary
+
+修复显式调用优先级规则，防止 AI 以 "简单问题" 为由绕过 PatchGuard。
+
+**核心问题**：用户显式调用 `/PatchGuard` 后，AI 仍然以 "问题简单" "只改两行" 等理由跳过 Analyze，直接修改代码。
+
+**解决方案**：增加最高优先级规则 Explicit Invocation Override。
+
+---
+
+### Key Changes
+
+#### 1. Explicit Invocation Override
+
+**只要用户消息中显式出现 `/PatchGuard`，就必须进入流程。**
+
+这是最高优先级规则，高于：
+- 问题复杂度判断
+- AI 自行判断
+- 任何 shortcut 理由
+
+#### 2. Forbidden Bypass Reasons
+
+禁止使用以下理由绕过 PatchGuard：
+
+| Forbidden Reason | Why Forbidden |
+|------------------|---------------|
+| "问题很简单" | 简单问题也需要边界确认 |
+| "只改一两行" | 一行代码也可能引入 regression |
+| "根因很明确" | 明确根因不等于边界明确 |
+| "可以快速修复" | 快速修复不等于安全修复 |
+| "上一个 patch 已 PASS" | 新问题是新 patch |
+
+#### 3. Required First Response
+
+如果用户显式调用 `/PatchGuard`：
+
+1. 必须进入 Analyze
+2. 禁止修改任何代码
+3. 确认或提议 Patch ID
+4. 处理未归档 patch
+
+#### 4. Unarchived Patch Handling
+
+检测到未归档 patch 时，必须询问用户选择：
+
+- Continue existing patch
+- Reopen existing patch
+- Create new patch
+- Archive existing patch first
+
+AI 不得自行判断新消息属于哪个 patch。
+
+#### 5. Simple Problems Must Also Analyze
+
+即使修复只需要一行代码，也必须输出最小 Analyze：
+
+- Problem Understanding
+- Current Wrong Behavior
+- Expected Behavior
+- Patch ID
+- Boundary
+- Do Not Touch
+- Minimal Patch Plan
+
+#### 6. RR-006: Explicit Invocation Override
+
+将 shortcut 行为沉淀为 regression pattern (RR-006)，写入 `.rr-example/rules/PATCH_RULES.md`。
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| SKILL.md | 新增 Explicit Invocation Override 章节、Unarchived Patch Handling 章节 |
+| README.md | 新增 Critical Rule: Explicit Invocation 章节 |
+| docs/QUICK_START.md | 新增 Critical Rule: Explicit Invocation 章节、Unarchived Patch Handling |
+| docs/WORKFLOW.md | 新增 Critical Rule: Explicit Invocation Override 章节 |
+| templates/PATCH_RULES.md | 新增 Critical Rule: Explicit Invocation 定义 |
+| .rr-example/rules/PATCH_RULES.md | 新增 RR-006: Explicit Invocation Override |
+| VERSION.md | 新增 v3.0.1 记录 |
+
+---
+
+### Regression Pattern (RR-006)
+
+| RR | Module | Severity | Summary |
+|----|--------|----------|---------|
+| RR-006 | explicit invocation | **Critical** | 禁止以任何理由跳过 Analyze |
+
+典型违规：
+- "root cause is clear"
+- "only two lines need changing"
+- "I can quickly fix this"
+- "previous patch was already PASS"
+
+---
+
 ## v3.0-beta (2024-05-24): Interaction Entry & Patch Session Directory Upgrade
 
 ### Release Summary

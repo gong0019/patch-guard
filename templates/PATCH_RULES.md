@@ -59,6 +59,26 @@ Typical AI patch mistakes include:
 - Local bug fixed by unrelated refactor
 - Patch scope expanded beyond locked boundary
 - Verification claims fixed but no evidence was provided
+- **Skipping Analyze when user explicitly invoked /PatchGuard** (CRITICAL)
+- **Bypassing flow with "simple problem" or "quick fix" excuses** (CRITICAL)
+
+---
+
+## Critical Rule: Explicit Invocation
+
+**When user explicitly invokes `/PatchGuard`, never skip Analyze.**
+
+Typical violation excuses:
+- "root cause is clear"
+- "only two lines need changing"
+- "I can quickly fix this"
+- "previous patch was already PASS"
+- "this is a simple bug"
+
+Required behavior:
+- Always enter Analyze first
+- Output minimum ANALYZE_REPORT with Problem Understanding + Patch ID + Boundary
+- Wait for user confirmation before any code modification
 
 ---
 

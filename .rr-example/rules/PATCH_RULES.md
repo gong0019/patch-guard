@@ -96,6 +96,31 @@
 
 ---
 
+### RR-006 (Critical)
+
+**Explicit Invocation Override**
+
+当用户显式调用 `/PatchGuard` 时：
+
+禁止：
+- 以任何理由跳过 Analyze
+- 使用 "简单问题" 作为 shortcut
+- 使用 "只改一两行" 作为 shortcut
+- 使用 "根因明确" 作为 shortcut
+- 使用 "可以快速修复" 作为 shortcut
+- 直接修改代码
+
+必须：
+- 进入 Analyze 阶段
+- 输出最小 ANALYZE_REPORT（Problem Understanding + Patch ID + Boundary）
+- 等待用户确认
+
+**原因**：多次发生 AI 以 "简单问题" 为由绕过 PatchGuard，直接修改代码，引入 regression。
+
+**Promoted By**: Human on 2024-05-24
+
+---
+
 ## RR Candidates (Not Promoted)
 
 ### C-001
@@ -133,6 +158,7 @@
 | RR-003 | warehouse | High | 禁止只修改基础区 | Human |
 | RR-004 | save pipeline | High | 禁止修改流程顺序 | Human |
 | RR-005 | workflow | Critical | 禁止直接修改核心逻辑 | Human |
+| RR-006 | explicit invocation | **Critical** | 禁止以任何理由跳过 Analyze | Human |
 
 ### RR Candidates
 

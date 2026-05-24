@@ -29,8 +29,26 @@ AI Coding 工具在修改代码时存在以下问题：
 | 顺手重构 | 局部修复时顺便重构、优化 |
 | 重新解释需求 | 开发阶段改变对问题的理解 |
 | 只完成流程 | 填模板但没有证明问题修复 |
+| **跳过 Analyze** | AI 以"简单问题"为由绕过流程，直接修改代码 |
 
 PatchGuard 通过结构化流程解决这些问题。
+
+---
+
+## Critical Rule: Explicit Invocation
+
+**只要用户显式调用 `/PatchGuard`，就必须进入流程。**
+
+禁止以下 shortcut 理由：
+
+| Forbidden Excuse | Why Forbidden |
+|------------------|---------------|
+| "问题很简单" | 简单问题也需要边界确认 |
+| "只改一两行" | 一行代码也可能引入 regression |
+| "根因很明确" | 明确根因不等于边界明确 |
+| "可以快速修复" | 快速修复不等于安全修复 |
+
+**RR-006**: Explicit Invocation Override - 禁止以任何理由跳过 Analyze。
 
 ---
 

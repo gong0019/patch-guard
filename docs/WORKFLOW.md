@@ -17,6 +17,66 @@ PatchGuard 通过五个内部阶段治理 AI 的代码修改行为：
 
 ---
 
+## Critical Rule: Explicit Invocation Override (v3.0)
+
+### Highest Priority
+
+**只要用户消息中显式出现 `/PatchGuard`，就必须进入 PatchGuard 流程。**
+
+这是最高优先级规则，高于：
+- 问题复杂度判断
+- AI 自行判断
+- 任何 shortcut 理由
+
+### Forbidden Bypass Reasons
+
+禁止使用以下理由绕过 PatchGuard：
+
+| Forbidden Reason | Why Forbidden |
+|------------------|---------------|
+| "问题很简单" | 简单问题也需要边界确认 |
+| "只改一两行" | 一行代码也可能引入 regression |
+| "根因很明确" | 明确根因不等于边界明确 |
+| "用户只是报告 bug" | 报告 bug 也需要分析 |
+| "上一个 patch 已 PASS" | 新问题是新 patch |
+| "可以快速修复" | 快速修复不等于安全修复 |
+| "不需要完整流程" | 流程完整性是 PatchGuard 核心价值 |
+
+### Required First Response
+
+如果用户显式调用 `/PatchGuard`，AI 第一响应必须：
+
+1. **进入 Analyze 阶段**
+2. **禁止修改任何代码**
+3. **确认或提议 Patch ID**
+4. **处理未归档 patch（如存在）**
+
+### Unarchived Patch Handling
+
+如果检测到已有 patch session 未归档或未 ACCEPTED：
+
+**AI 不得自行判断新消息属于旧 patch 或新 patch。**
+
+必须询问用户：
+
+```
+检测到已有未归档 patch：
+- <patch-id> (状态: <current_phase>)
+
+请选择：
+1. Continue existing patch
+2. Reopen existing patch
+3. Create new patch
+4. Archive existing patch first
+```
+
+用户确认选择前：
+- ❌ 不得修改任何代码
+- ❌ 不得创建新 patch 目录
+- ❌ 不得写入任何 patch 文件
+
+---
+
 ## Important: V3 Limitations
 
 **V3-beta 是 Prompt Protocol，不是自动验证工具。**

@@ -45,6 +45,50 @@ PatchGuard 是一个 **AI Patch Governance System**，用于治理 AI Coding 工
 
 ---
 
+## Critical Rule: Explicit Invocation (v3.0)
+
+**只要用户显式调用 `/PatchGuard`，就必须进入流程。**
+
+### Forbidden Shortcut Excuses
+
+禁止使用以下理由绕过 PatchGuard：
+
+| Forbidden Excuse | Why Forbidden |
+|------------------|---------------|
+| "问题很简单" | 简单问题也需要边界确认 |
+| "只改一两行" | 一行代码也可能引入 regression |
+| "根因很明确" | 明确根因不等于边界明确 |
+| "可以快速修复" | 快速修复不等于安全修复 |
+| "上一个 patch 已 PASS" | 新问题是新 patch |
+
+### Required Behavior
+
+如果用户显式调用 `/PatchGuard`：
+
+1. **必须进入 Analyze**
+2. **禁止直接修改代码**
+3. **输出最小 ANALYZE_REPORT**
+4. **等待用户确认**
+
+### Unarchived Patch Handling
+
+如果检测到已有未归档 patch：
+
+```
+检测到已有未归档 patch：
+- <patch-id> (状态: <current_phase>)
+
+请选择：
+1. Continue existing patch
+2. Reopen existing patch
+3. Create new patch
+4. Archive existing patch first
+```
+
+**在用户确认前，不得修改代码。**
+
+---
+
 ## Quick Start
 
 ### Single Entry Point: /PatchGuard

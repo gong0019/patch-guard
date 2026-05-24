@@ -17,6 +17,94 @@
 
 ---
 
+## Explicit Invocation Override (v3.0)
+
+### Highest Priority Rule
+
+**只要用户消息中显式出现 `/PatchGuard`，就必须进入 PatchGuard 流程。**
+
+这是最高优先级规则，高于：
+- 问题复杂度判断
+- AI 自行判断
+- 任何 shortcut 理由
+
+### Forbidden Bypass Reasons
+
+禁止使用以下理由绕过 PatchGuard：
+
+| Forbidden Reason | Why Forbidden |
+|------------------|---------------|
+| "问题很简单" | 简单问题也需要边界确认 |
+| "只改一两行" | 一行代码也可能引入 regression |
+| "根因很明确" | 明确根因不等于边界明确 |
+| "用户只是报告 bug" | 报告 bug 也需要分析 |
+| "上一个 patch 已 PASS" | 新问题是新 patch |
+| "可以快速修复" | 快速修复不等于安全修复 |
+| "不需要完整流程" | 流程完整性是 PatchGuard 核心价值 |
+
+### Required First Response
+
+如果用户显式调用 `/PatchGuard`，AI 第一响应必须：
+
+1. **进入 Analyze 阶段**
+2. **禁止修改任何代码**
+3. **确认或提议 Patch ID**
+4. **处理未归档 patch（如存在）**
+
+**禁止直接修改代码，禁止跳过 Analyze。**
+
+### Simple Problems Must Also Analyze
+
+即使 AI 判断修复只需要一行代码，也必须输出最小 Analyze：
+
+| Required Section | Why Required |
+|------------------|---------------|
+| Problem Understanding | 确认问题本身 |
+| Current Wrong Behavior | 明确当前状态 |
+| Expected Behavior | 明确期望状态 |
+| Patch ID | 确认 patch 标识 |
+| Boundary | 明确修改范围 |
+| Do Not Touch | 明确禁止区域 |
+| Minimal Patch Plan | 明确修改方案 |
+
+然后等待用户确认。
+
+---
+
+## Unarchived Patch Handling (v3.0)
+
+### Detection Rule
+
+如果检测到已有 patch session 未归档或未 ACCEPTED：
+
+**AI 不得自行判断新消息属于旧 patch 或新 patch。**
+
+### Required User Confirmation
+
+必须询问用户：
+
+```
+检测到已有未归档 patch：
+- <patch-id> (状态: <current_phase>)
+
+请选择：
+1. Continue existing patch - 继续当前 patch
+2. Reopen existing patch - 返回 Analyze 重新分析
+3. Create new patch - 创建新 patch
+4. Archive existing patch first - 先归档现有 patch
+
+在确认前，不得修改代码。
+```
+
+### Before User Confirmation
+
+用户确认选择前：
+- ❌ 不得修改任何代码
+- ❌ 不得创建新 patch 目录
+- ❌ 不得写入任何 patch 文件
+
+---
+
 ## User Entry Point (v3.0)
 
 ### Single Entry: /PatchGuard
