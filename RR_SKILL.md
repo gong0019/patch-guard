@@ -164,34 +164,52 @@ LOCKED: [timestamp] (仅在用户确认后添加)
 
 **必须**：输入 `停止，重新分析`，返回 Phase 1
 
-### BOUNDARY.md Format
+### BOUNDARY.md Format (v1.1)
 
 ```markdown
 # Patch Boundary
 
 ## Allowed Files
+以下文件可以修改：
 - [file path 1]
 - [file path 2]
 
+### Allowed New Files (Optional)
+以下新文件允许创建（需提前列入）：
+- [new file path 1] (仅限测试文件)
+- [new file path 2] (仅限测试文件)
+
+**注意**：如需新增文件，必须在 Analyze 阶段提前规划并列入此处。
+
 ## Forbidden Files
+以下文件禁止修改：
 - [file path 1]
 - [file path 2]
 
 ## Forbidden Behaviors
-- 重构
-- 顺手优化
-- 架构改进
-- 改动无关模块
-- 添加新功能
-- 修改代码风格
-- 重命名变量/函数
+以下行为禁止执行：
+- ❌ 重构代码结构
+- ❌ 顺手优化
+- ❌ 架构改进
+- ❌ 改动无关模块
+- ❌ 添加新业务功能
+- ❌ 修改代码风格
+- ❌ 重命名变量/函数
+- ❌ 删除现有文件
+
+### New Files Rule (v1.1)
+- ❌ **默认禁止新增业务文件**
+- ✅ 新增测试文件必须提前列入 Allowed New Files
+- ❌ 未列入 Allowed 的新增文件 → VERIFY 时一律 FAIL
 
 ## Stop Conditions
-- 发现需要修改 Forbidden Files
-- 发现问题无法在 Allowed Files 内解决
-- 发现新 regression 风险
-- 发现需求理解偏差
-- 发现需要扩大修改范围
+遇到以下情况必须立即停止并报告：
+- 🛑 发现需要修改 Forbidden Files
+- 🛑 发现问题无法在 Allowed Files 内解决
+- 🛑 发现新 regression 风险
+- 🛑 发现需求理解偏差
+- 🛑 发现需要扩大修改范围
+- 🛑 发现需要新增业务文件（未提前列入 Allowed）
 
 ## Notes
 [Any special notes for this patch]
@@ -360,9 +378,18 @@ Behaviors:
 
 检查修改是否符合边界约束。
 
+**重要提示**：V1 是 Prompt Protocol，不是自动验证工具。rr verify 仍然需要人工审查。
+
 ### Trigger
 
 用户输入 `RR 验证` / `rr verify`
+
+### Hard Rules (v1.1)
+
+1. **如果存在 Unverified Items，状态不能是 PASS，只能是 WARNING 或 FAIL**
+2. **未列入 Allowed 的新增文件一律 FAIL**
+3. **PASS 不代表业务完全正确，只代表边界检查通过**
+4. **WARNING 必须人工验证后才能提交**
 
 ### Output
 
@@ -378,48 +405,67 @@ Behaviors:
 - [file 1]: [changes summary]
 - [file 2]: [changes summary]
 
+## New Files Created
+- [new file 1]: ✅ in Allowed Files / ❌ NOT in Allowed Files
+Result: [✅ all new files in Allowed / ❌ X new file(s) NOT in Allowed]
+
 ## Boundary Check
 
 ### Allowed Files Check
 - [file 1]: ✅ in allowed
 - [file 2]: ✅ in allowed
 - [file 3]: ❌ NOT in allowed (if any)
-
 Result: [✅ all in allowed / ❌ X file(s) out of allowed]
 
 ### Forbidden Files Check
 - [file X]: ✅ not touched / ❌ TOUCHED
-
 Result: [✅ none touched / ❌ touched: ...]
 
 ### Forbidden Behaviors Check
 - 重构: ✅ none / ❌ detected
 - 优化: ✅ none / ❌ detected
 - 架构改动: ✅ none / ❌ detected
-
 Result: [✅ none / ❌ detected: ...]
 
 ## Unverified Items
 - [item 1]: [需要验证的内容]
 - [item 2]: [需要验证的内容]
 
+## Evidence
+| Evidence Type | Source | Details |
+|---------------|--------|---------|
+| Diff Source | [git diff / 手动记录] | [具体来源] |
+| Modified Lines | [行数范围] | [修改行号] |
+| Review Method | [AI 自查 / 人工审查] | [审查方式] |
+
+## Manual Verification Required
+| Item | Reason | Priority |
+|------|--------|----------|
+| [项目 1] | [需要人工验证的原因] | High / Medium / Low |
+
 ## Risks
 - [risk 1]
 - [risk 2]
 
-## Recommendation
-- PASS: 可提交，边界合规，风险可控
-- WARNING: 符合边界但有未验证项，需补充验证后提交
-- FAIL: 超出边界或触碰 Forbidden，需回滚并返回 Phase 1
+## Final Recommendation
+- PASS: 边界检查通过，可提交
+- WARNING: 边界检查通过，但存在未验证项，**必须人工验证后才能提交**
+- FAIL: 边界检查失败，必须回滚并返回 Phase 1
 ```
 
-### Status Definition
+### Status Definition (v1.1)
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | 全部 Allowed，无 Forbidden，风险可控 | 可提交 |
-| WARNING | 全部 Allowed，但有未验证项 | 需补充验证 |
-| FAIL | 有超出 Allowed 或触碰 Forbidden | 必须回滚，返回 Phase 1 |
+| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 可提交 |
+| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ **必须人工验证后才能提交** |
+| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须回滚，返回 Phase 1 |
+
+### Important Notes
+
+- **PASS 不代表业务完全正确**，只代表边界检查通过
+- **WARNING 必须人工验证后才能提交**
+- **FAIL 必须回滚并返回 Phase 1 重新分析**
 
 ---
 

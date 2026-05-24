@@ -7,6 +7,12 @@
 - `src/components/ProductEditor.vue`
 - `src/utils/ext_save_data.js`
 
+### Allowed New Files (Optional)
+
+本次 patch 不需要新增文件。
+
+（如需新增测试文件，必须在 Analyze 阶段提前列入此处）
+
 ---
 
 ## Forbidden Files
@@ -29,12 +35,17 @@
 - ❌ 顺手优化其他组件
 - ❌ 架构改进
 - ❌ 改动无关模块
-- ❌ 添加新功能
+- ❌ 添加新业务功能
 - ❌ 修改代码风格
 - ❌ 重命名变量/函数
-- ❌ 添加新文件
 - ❌ 删除现有文件
 - ❌ 修改 variants 核心状态结构
+
+### New Files Rule (v1.1)
+
+- ❌ **默认禁止新增业务文件**
+- ✅ 新增测试文件必须提前列入 Allowed New Files
+- ❌ 未列入 Allowed 的新增文件 → VERIFY 时一律 FAIL
 
 ---
 
@@ -48,7 +59,7 @@
 - 🛑 发现新 regression 风险
 - 🛑 发现需求理解偏差
 - 🛑 发现需要扩大修改范围
-- 🛑 发现需要新增文件
+- 🛑 发现需要新增业务文件（未提前列入 Allowed）
 
 ---
 
@@ -64,4 +75,4 @@
 ## Generated From
 
 - ANALYZE_REPORT.md: v3 (LOCKED)
-- Generated: 2024-05-24 10:50
+- Generated: 2024-05-24 10:50 (v1.1 updated)

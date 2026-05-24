@@ -2,7 +2,7 @@
 
 ## Status
 
-PASS
+WARNING
 
 ---
 
@@ -12,6 +12,16 @@ PASS
 |------|-----------------|
 | `src/components/ProductEditor.vue` | 修复 variants 数据回显绑定逻辑 |
 | `src/utils/ext_save_data.js` | 修复 variants 数据序列化处理 |
+
+---
+
+## New Files Created
+
+| File | Status |
+|------|--------|
+| (无新增文件) | ✅ 无新增 |
+
+**Result**: ✅ 无新增文件
 
 ---
 
@@ -50,7 +60,7 @@ PASS
 | 优化 | ✅ none |
 | 架构改动 | ✅ none |
 | 改动无关模块 | ✅ none |
-| 添加新功能 | ✅ none |
+| 添加新业务功能 | ✅ none |
 | 修改代码风格 | ✅ none |
 | 重命名 | ✅ none |
 
@@ -67,6 +77,29 @@ PASS
 - [ ] 其他使用 variants 的页面组件是否受影响
 - [ ] update_ary 和 insert_ary 在边界场景下的调用
 
+**Unverified Items Count**: 4
+
+---
+
+## Evidence
+
+| Evidence Type | Source | Details |
+|---------------|--------|---------|
+| Diff Source | git diff / AI 自查 | 本次修改涉及 2 个文件 |
+| Modified Lines | ProductEditor.vue: 45-52, ext_save_data.js: 23-30 | 具体修改行号范围 |
+| Review Method | AI 自查 | 需人工审查确认 |
+
+---
+
+## Manual Verification Required
+
+| Item | Reason | Priority |
+|------|--------|----------|
+| 编辑页面其他产品类型回显 | 不同产品类型可能有不同 variants 结构 | High |
+| 数据库数据完整性 | 保存逻辑修改可能影响数据一致性 | High |
+| 其他页面组件影响 | variants 被多处引用，需验证副作用 | Medium |
+| update_ary/insert_ary 边界场景 | 边界场景可能触发未预期行为 | Medium |
+
 ---
 
 ## Risks
@@ -78,17 +111,27 @@ PASS
 
 ## Recommendation
 
-### Status Definition
+### Status Definition (v1.1)
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | 全部 Allowed，无 Forbidden，风险可控 | ✅ 可提交 |
-| WARNING | 全部 Allowed，但有未验证项 | ⚠️ 需补充验证后提交 |
-| FAIL | 有超出 Allowed 或触碰 Forbidden | ❌ 必须回滚，返回 Phase 1 |
+| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 可提交 |
+| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ **必须人工验证后才能提交** |
+| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须回滚，返回 Phase 1 |
 
-**当前状态**: PASS
+### Hard Rule
 
-**建议**: 可提交。建议在提交后补充验证未验证项。
+**如果存在 Unverified Items，状态不能是 PASS，只能是 WARNING 或 FAIL。**
+
+### Final Recommendation
+
+**WARNING**: 边界检查通过，但存在 4 个未验证项。
+
+**必须人工验证以下内容后才能提交**：
+1. 编辑页面在其他产品类型下的回显
+2. 保存后数据库数据完整性
+3. 其他使用 variants 的页面组件是否受影响
+4. update_ary 和 insert_ary 在边界场景下的调用
 
 ---
 
@@ -96,4 +139,4 @@ PASS
 
 - BOUNDARY.md: v1
 - TASK_PACKET.md: v1
-- Generated: 2024-05-24 11:30
+- Generated: 2024-05-24 11:30 (v1.1 updated)

@@ -11,6 +11,18 @@ RR Skill 通过四个阶段治理 AI 的代码修改行为：
 
 ---
 
+## Important: V1 Limitations (v1.1)
+
+**V1 是 Prompt Protocol，不是自动验证工具。**
+
+- `rr verify` 输出依赖 AI 自查，**仍然需要人工审查**
+- **PASS 不代表业务完全正确**，只代表边界检查通过
+- **WARNING 必须人工验证后才能提交**
+- 如果存在 Unverified Items，状态不能是 PASS，只能是 WARNING 或 FAIL
+- 未列入 Allowed 的新增文件一律 FAIL
+
+---
+
 ## Phase 1: RR Analyze
 
 ### Purpose
@@ -206,14 +218,25 @@ ANALYZE_REPORT.md (LOCKED)
 
 检查修改是否符合边界约束。
 
+**重要提示**：V1 是 Prompt Protocol，`rr verify` 输出依赖 AI 自查，**仍然需要人工审查**。
+
 ### Trigger
 
 输入：`RR 验证` / `rr verify`
+
+### Hard Rules (v1.1)
+
+1. **如果存在 Unverified Items，状态不能是 PASS，只能是 WARNING 或 FAIL**
+2. **未列入 Allowed 的新增文件一律 FAIL**
+3. **PASS 不代表业务完全正确**，只代表边界检查通过
+4. **WARNING 必须人工验证后才能提交**
 
 ### Process
 
 ```
 检查修改文件列表
+↓
+检查新增文件列表
 ↓
 比对 Allowed Files
 ↓
@@ -221,27 +244,38 @@ ANALYZE_REPORT.md (LOCKED)
 ↓
 检查 Forbidden Behaviors
 ↓
+统计 Unverified Items
+↓
 输出 VERIFY_REPORT.md
 ```
 
-### Output: VERIFY_REPORT.md
+### Output: VERIFY_REPORT.md (v1.1)
 
 | Section | Description |
 |---------|-------------|
 | Status | PASS / WARNING / FAIL |
 | Modified Files | 实际修改的文件列表 |
+| New Files Created | 新增文件及其 Allowed 状态 |
 | Boundary Check | Allowed/Forbidden 检查结果 |
-| Unverified Items | 尚未验证的内容 |
+| Unverified Items | 尚未验证的内容（存在时不能 PASS） |
+| Evidence | 修改证据记录 |
+| Manual Verification Required | 需人工验证的项目 |
 | Risks | 风险项列表 |
-| Recommendation | 提交建议 |
+| Final Recommendation | 提交建议 |
 
-### Status Definition
+### Status Definition (v1.1)
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | 全部 Allowed，无 Forbidden | ✅ 可提交 |
-| WARNING | 全部 Allowed，有未验证项 | ⚠️ 补充验证后提交 |
-| FAIL | 超出边界或触碰 Forbidden | ❌ 回滚，返回 Phase 1 |
+| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 可提交（仍需人工审查） |
+| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ **必须人工验证后才能提交** |
+| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 回滚，返回 Phase 1 |
+
+### Important Notes
+
+- **PASS 不代表业务完全正确**，只代表边界检查通过
+- **WARNING 必须人工验证后才能提交**
+- **FAIL 必须回滚并返回 Phase 1 重新分析**
 
 ---
 
@@ -290,19 +324,22 @@ ANALYZE_REPORT.md (LOCKED)
 1. 仔细检查 BOUNDARY.md 的 Allowed/Forbidden
 2. 确认 Stop Conditions 是否覆盖关键风险
 3. 验证 TASK_PACKET.md 是否清晰明确
+4. **如需新增文件，必须提前列入 Allowed New Files**
 
 ### Implement 阶段
 
 1. 只关注 TASK_PACKET.md 的内容
 2. 随时关注 Stop Conditions
 3. 有疑问立即停止，不要继续
+4. **禁止新增未列入 Allowed 的文件**
 
-### Verify 阶段
+### Verify 阶段 (v1.1)
 
 1. 认真检查 VERIFY_REPORT.md
-2. 确认 Status 为 PASS 才提交
-3. WARNING 状态需补充验证
-4. FAIL 状态必须回滚
+2. **PASS 不代表业务完全正确**，仍需人工审查
+3. **WARNING 必须人工验证后才能提交**
+4. **FAIL 必须回滚并返回 Phase 1**
+5. 检查 Unverified Items，存在时状态不能是 PASS
 
 ---
 

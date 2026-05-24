@@ -1,5 +1,102 @@
 # RR Skill Version Log
 
+## v1.1.0 (2024-05-24)
+
+### Release Summary
+
+V1 协议修正版本，修复不一致和可读性问题，不增加新功能。
+
+**修正内容**：
+- Markdown 格式确认正常（已验证多行格式）
+- Verify 状态定义修复（PASS/WARNING/FAIL 条件调整）
+- 示例状态修复（Unverified Items 存在时改为 WARNING）
+- Boundary 新增文件规则修复（默认禁止，需提前列入）
+- Unverified Items 不得 PASS 硬规则
+- 文档说明 V1 是 Prompt Protocol，不是自动验证工具
+
+---
+
+### Fixes
+
+#### 1. Verify 状态定义修复
+
+| Status | Condition (v1.0) | Condition (v1.1) |
+|--------|------------------|------------------|
+| PASS | 全部 Allowed，无 Forbidden | 无越界、无 Forbidden、**无未验证关键项** |
+| WARNING | 全部 Allowed，有未验证项 | 无越界、无 Forbidden，**但存在未验证项** |
+| FAIL | 超出边界或触碰 Forbidden | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 |
+
+**硬规则**：如果存在 Unverified Items，状态不能是 PASS，只能是 WARNING 或 FAIL。
+
+#### 2. VERIFY_REPORT.md 模板强化
+
+新增字段：
+- **Evidence** - 修改证据记录（Diff Source、Modified Lines、Review Method）
+- **Manual Verification Required** - 需人工验证的项目表
+- **New Files Created** - 新增文件及其 Allowed 状态
+- **Final Recommendation** - 最终提交建议
+
+#### 3. BOUNDARY.md 新增文件规则
+
+v1.0: ❌ 添加新文件（绝对禁止）
+
+v1.1:
+- ❌ **默认禁止新增业务文件**
+- ✅ 新增测试文件必须提前列入 Allowed New Files
+- ❌ 未列入 Allowed 的新增文件 → VERIFY 时一律 FAIL
+
+新增 `Allowed New Files (Optional)` 部分。
+
+#### 4. V1 Limitations 说明
+
+在 RR_SKILL.md、QUICK_START.md、WORKFLOW.md 中明确说明：
+- **V1 是 Prompt Protocol，不是自动验证工具**
+- **rr verify 仍然需要人工审查**
+- **PASS 不代表业务完全正确**，只代表边界检查通过
+- **WARNING 必须人工验证后才能提交**
+
+#### 5. 示例文件修复
+
+`.rr-example/current/VERIFY_REPORT.md`：
+- 状态从 PASS 改为 WARNING（存在 Unverified Items）
+- 增加 Evidence 和 Manual Verification Required 字段
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| RR_SKILL.md | Phase 4 状态定义修复、BOUNDARY.md Format 更新、Hard Rules 增加 |
+| templates/VERIFY_REPORT.md | 增加 Evidence、Manual Verification Required、Final Recommendation |
+| templates/BOUNDARY.md | 增加 Allowed New Files 部分、New Files Rule |
+| .rr-example/current/VERIFY_REPORT.md | 状态改为 WARNING、增加新字段 |
+| .rr-example/current/BOUNDARY.md | 增加 Allowed New Files 部分 |
+| docs/QUICK_START.md | 增加 V1 Limitations、Status Definition v1.1 |
+| docs/WORKFLOW.md | 增加 V1 Limitations、Phase 4 Hard Rules、更新 Best Practices |
+| VERSION.md | 增加 v1.1.0 记录 |
+
+---
+
+### Status Definition (v1.1)
+
+| Status | Condition | Action |
+|--------|-----------|--------|
+| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 可提交（仍需人工审查） |
+| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ **必须人工验证后才能提交** |
+| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须回滚，返回 Phase 1 |
+
+---
+
+### Hard Rules (v1.1)
+
+1. 如果存在 Unverified Items，状态不能是 PASS，只能是 WARNING 或 FAIL
+2. 未列入 Allowed 的新增文件一律 FAIL
+3. PASS 不代表业务完全正确，只代表边界检查通过
+4. WARNING 必须人工验证后才能提交
+
+---
+
 ## v1.0.0 (2024-05-24)
 
 ### Release Summary
