@@ -10,6 +10,87 @@
 
 ---
 
+## v3.0.2 (2024-05-24): Activation Rule Check
+
+### Release Summary
+
+补充 Activation Rule Check，明确 PATCH_RULES.md 不存在不阻塞激活，AI 不能自动写入 Promoted Rules。
+
+**核心问题**：需要检查已有 promoted rules，但不能因为缺失就阻塞或自动写入。
+
+---
+
+### Key Changes
+
+#### 1. Activation Contract Priority
+
+**Activation Contract 优先级最高。**
+
+`/PatchGuard` 的激活规则写在 SKILL.md / Project Rules 中。
+
+**不能依赖 PATCH_RULES.md 是否存在对应规则来决定是否激活。**
+
+即使 PATCH_RULES.md 完全不存在，`/PatchGuard` 也必须激活。
+
+#### 2. Activation Handshake Format
+
+调用 `/PatchGuard` 后第一响应必须包含 Rules Check：
+
+```
+PatchGuard Activated
+Phase: Analyze
+Code Modification: Disabled
+Patch ID: [Provided / Proposed / Pending]
+
+Rules Check:
+- File: .rr/rules/PATCH_RULES.md
+- Status: [Readable / Not Found / Error]
+- Matching Promoted Rule: [Found: RR-XXX / Missing / Unknown]
+- Candidate Needed: [Yes / No]
+
+Next Step: Problem Understanding
+```
+
+#### 3. Missing Rule Does NOT Block
+
+| PATCH_RULES.md Status | Behavior |
+|-----------------------|----------|
+| Readable, Rule Found | 引用规则，继续 Analyze |
+| Readable, Rule Missing | 标记 Missing，继续 Analyze |
+| Not Found | 标记 Unknown，继续 Analyze |
+| Error | 标记 Unknown，继续 Analyze |
+
+**缺少对应 rule 不阻塞 activation。**
+
+#### 4. No Auto-Promotion
+
+**即使发现需要新规则，AI 也不能自动写入 PATCH_RULES.md。**
+
+AI 只能：
+- 检查是否存在 matching promoted rule
+- 在 Handshake 中报告检查结果
+- 如果缺失，标记 Candidate Needed: Yes
+- 在 Promote 阶段生成 RR Candidate
+- 等待用户确认 Promote / Reject / Defer
+
+**即使是 activation-related rule，也必须遵守 Promote Governance。**
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| SKILL.md | 新增 Activation Rule Check 章节 |
+| README.md | 新增 Activation Rule Check 章节 |
+| docs/QUICK_START.md | 新增 Activation Rule Check 章节 |
+| docs/WORKFLOW.md | 新增 Activation Rule Check 章节 |
+| templates/PATCH_RULES.md | 新增 Activation Rule Check 说明 |
+| .rr-example/rules/PATCH_RULES.md | 新增 Activation Rule Check Note |
+| VERSION.md | 新增 v3.0.2 记录 |
+
+---
+
 ## v3.0.1 (2024-05-24): Explicit Invocation Override
 
 ### Release Summary

@@ -89,6 +89,48 @@ PatchGuard 是一个 **AI Patch Governance System**，用于治理 AI Coding 工
 
 ---
 
+## Activation Rule Check (v3.0)
+
+### Activation Handshake
+
+调用 `/PatchGuard` 后第一响应：
+
+```
+PatchGuard Activated
+Phase: Analyze
+Code Modification: Disabled
+Patch ID: [Provided / Proposed / Pending]
+
+Rules Check:
+- Matching Promoted Rule: [Found: RR-XXX / Missing / Unknown]
+- Candidate Needed: [Yes / No]
+
+Next Step: Problem Understanding
+```
+
+### Rules Check Does NOT Block
+
+**缺少 promoted rule 不阻塞 activation。**
+
+即使 PATCH_RULES.md 不存在，也必须进入 Analyze。
+
+| Rules Status | Action |
+|--------------|--------|
+| Found | 引用规则，继续 Analyze |
+| Missing | 标记缺失，继续 Analyze |
+| Unknown | 标记未知，继续 Analyze |
+
+### No Auto-Promotion
+
+**AI 不能自动写入 PATCH_RULES.md。**
+
+即使发现需要新规则：
+- 只能生成 RR Candidate
+- Human 必须确认 Promote
+- 未确认不能写入
+
+---
+
 ## Quick Start
 
 ### Single Entry Point: /PatchGuard

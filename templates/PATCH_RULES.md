@@ -16,6 +16,32 @@ PATCH_RULES.md should contain only active, human-confirmed regression rules.
 
 ---
 
+## Activation Rule Check
+
+### Rules File Does NOT Block Activation
+
+**PATCH_RULES.md 是否存在不影响 /PatchGuard 激活。**
+
+即使 PATCH_RULES.md 完全不存在、无法读取、或缺少对应规则：
+
+- `/PatchGuard` 仍然必须激活
+- 必须进入 Analyze 阶段
+- 不能跳过流程
+
+### No Auto-Promotion Even for Activation Rules
+
+**即使是 activation-related rule，也必须遵守 Promote Governance。**
+
+AI 在发现缺失规则时：
+- ✅ 可以在 Activation Handshake 标记 Candidate Needed: Yes
+- ✅ 可以在 Promote 阶段生成 RR Candidate
+- ❌ 不能自动写入 PATCH_RULES.md
+- ❌ 不能跳过 Human 确认
+
+**Human 必须明确确认 Promote 后，规则才能写入。**
+
+---
+
 ## Important: Not Every Bug Becomes a Rule
 
 **不是每个 bug 都写入 PATCH_RULES。**

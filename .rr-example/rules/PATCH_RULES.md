@@ -12,6 +12,18 @@
 
 ---
 
+## Activation Rule Check Note
+
+**PATCH_RULES.md 是否存在不影响 /PatchGuard 激活。**
+
+即使本文件不存在或缺少对应规则：
+- `/PatchGuard` 仍然必须激活
+- 必须进入 Analyze 阶段
+- 不能跳过流程
+- 不能自动写入新规则
+
+---
+
 ## Promoted Rules
 
 ### RR-001

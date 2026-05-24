@@ -77,6 +77,74 @@ PatchGuard 通过五个内部阶段治理 AI 的代码修改行为：
 
 ---
 
+## Activation Rule Check (v3.0)
+
+### Activation Contract Priority
+
+**Activation Contract 优先级最高。**
+
+`/PatchGuard` 的激活规则写在 SKILL.md / Project Rules 中。
+
+**不能依赖 PATCH_RULES.md 是否存在来决定是否激活。**
+
+即使 PATCH_RULES.md 完全不存在，也必须激活。
+
+### Activation Handshake
+
+调用 `/PatchGuard` 后第一响应必须：
+
+```
+PatchGuard Activated
+Phase: Analyze
+Code Modification: Disabled
+Patch ID: [Provided / Proposed / Pending Confirmation]
+Existing Patch Session: [None / Found: <patch-id> (<state>)]
+
+Rules Check:
+- File: .rr/rules/PATCH_RULES.md
+- Status: [Readable / Not Found / Error]
+- Matching Promoted Rule: [Found: RR-XXX / Missing / Unknown]
+- Candidate Needed: [Yes / No]
+
+Next Step: Problem Understanding
+```
+
+### Rules Check Behavior
+
+| PATCH_RULES.md Status | Behavior |
+|-----------------------|----------|
+| Readable, Rule Found | 引用 RR-XXX，继续 Analyze |
+| Readable, Rule Missing | 标记 Missing，继续 Analyze，不阻塞 |
+| Not Found | 标记 Unknown，继续 Analyze |
+| Error | 标记 Unknown，继续 Analyze |
+
+**缺少对应 rule 不阻塞 activation。**
+
+### Missing Rule Does NOT Block
+
+如果 PATCH_RULES.md 缺少对应 promoted rule：
+
+- ✅ 继续进入 Analyze
+- ❌ 不得自动写入 Promoted Rules
+- ❌ 不得阻塞流程
+- ✅ 在 Promote 阶段生成 RR Candidate
+- ✅ 请求用户选择 Promote / Reject / Defer
+
+### No Auto-Promotion
+
+**即使发现需要新规则，AI 也不能自动写入 PATCH_RULES.md。**
+
+AI 只能：
+1. 检查是否存在 matching promoted rule
+2. 在 Handshake 中报告检查结果
+3. 如果缺失，标记 Candidate Needed: Yes
+4. 在 Promote 阶段生成 RR Candidate
+5. 等待用户确认 Promote / Reject / Defer
+
+**Human 必须明确确认 Promote 后，规则才能写入 PATCH_RULES.md。**
+
+---
+
 ## Important: V3 Limitations
 
 **V3-beta 是 Prompt Protocol，不是自动验证工具。**

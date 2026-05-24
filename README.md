@@ -52,6 +52,49 @@ PatchGuard 通过结构化流程解决这些问题。
 
 ---
 
+## Activation Rule Check (v3.0)
+
+### Activation Handshake
+
+调用 `/PatchGuard` 后第一响应：
+
+```
+PatchGuard Activated
+Phase: Analyze
+Code Modification: Disabled
+Patch ID: [Provided / Proposed / Pending]
+Existing Patch Session: [None / Found]
+
+Rules Check:
+- Matching Promoted Rule: [Found / Missing / Unknown]
+- Candidate Needed: [Yes / No]
+
+Next Step: Problem Understanding
+```
+
+### Missing Rule Does NOT Block
+
+**缺少对应 promoted rule 不阻塞 activation。**
+
+即使 PATCH_RULES.md 完全不存在，`/PatchGuard` 也必须激活。
+
+| Rules Status | Behavior |
+|--------------|----------|
+| Found | 引用规则，继续 |
+| Missing | 标记缺失，继续 |
+| Unknown | 标记未知，继续 |
+
+### No Auto-Promotion
+
+**AI 不能自动写入 PATCH_RULES.md。**
+
+即使发现需要新规则：
+- AI 只能生成 RR Candidate
+- Human 必须确认 Promote
+- 未确认前不能成为 active rule
+
+---
+
 ## What PatchGuard Is Not
 
 明确边界：
