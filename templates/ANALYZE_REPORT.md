@@ -5,13 +5,31 @@
 
 ---
 
-## Problem
+## Problem Understanding (v2.0)
 
-[用户原始问题描述]
+**Analyze 阶段必须先确认问题本身，再做分类和边界。**
+
+### User Report
+
+[用户原始问题描述，直接引用用户的话]
+
+### Current Wrong Behavior
+
+[当前系统的错误行为是什么？具体表现？]
+
+### Expected Behavior
+
+[用户期望的正确行为是什么？]
+
+### Confirmation Needed
+
+[需要与用户确认的问题点，如有]
+
+**如果 User Report / Current Wrong Behavior / Expected Behavior 未填写清楚，禁止进入 Problem Classification。**
 
 ---
 
-## Problem Classification
+## Problem
 
 选择一项：
 

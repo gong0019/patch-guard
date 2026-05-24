@@ -1,5 +1,21 @@
 # AI Patch Governance Skill（RR Skill）需求文档
 
+---
+
+## Historical Document Notice
+
+**本文件是历史需求文档，不是当前执行规则。**
+
+当前执行规则以以下文件为准：
+- `RR_SKILL.md` - 核心 Skill Prompt 规范
+- `templates/` - 模板文件
+- `docs/WORKFLOW.md` - 详细工作流说明
+- `VERSION.md` - 版本记录
+
+本文件仅作为历史参考，记录了最初的设计思路和需求来源。
+
+---
+
 ## 一、项目目标
 
 构建一个用于 AI Coding 的「Patch Governance Skill（补丁治理 Skill）」。

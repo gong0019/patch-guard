@@ -6,6 +6,39 @@
 
 ---
 
+## Fix Verification (v2.0)
+
+**Verify 阶段必须先确认原始问题是否被修复，再检查流程合规。**
+
+### Original Problem
+
+[从 ANALYZE_REPORT.md 的 Problem Understanding 部分引用]
+
+### Expected Behavior
+
+[从 ANALYZE_REPORT.md 的 Expected Behavior 引用]
+
+### Actual Behavior After Patch
+
+[修改后系统的实际行为是什么？]
+
+### Verification Method
+
+[如何验证问题已修复？测试方法？]
+
+### Fix Result
+
+| Result | Description |
+|--------|-------------|
+| Fixed | 问题已修复，Actual Behavior 匹配 Expected Behavior |
+| Not Fixed | 问题未修复，Actual Behavior 仍不匹配 Expected Behavior |
+| Partially Fixed | 问题部分修复，仍有残留问题 |
+| Unknown | 无法确认是否修复，需要进一步验证 |
+
+**如果 Fix Result 不是 Fixed，VERIFY_REPORT 不能是 PASS。**
+
+---
+
 ## Modified Files
 
 | File | Changes Summary |

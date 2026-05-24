@@ -6,6 +6,39 @@ WARNING
 
 ---
 
+## Fix Verification (v2.0)
+
+**Verify 阶段必须先确认原始问题是否被修复，再检查流程合规。**
+
+### Original Problem
+
+编辑产品页面时，variants 数据的回显丢失，保存后数据不完整。
+
+### Expected Behavior
+
+- variants 数据正确回显
+- 保存后数据完整，与编辑时显示一致
+
+### Actual Behavior After Patch
+
+- variants 数据回显已修复（初步测试通过）
+- 保存逻辑已修复（初步测试通过）
+
+### Verification Method
+
+- 手动测试编辑页面回显
+- 手动测试保存后数据完整性
+
+### Fix Result
+
+| Result | Description |
+|--------|-------------|
+| Partially Fixed | 主要问题已修复，但其他产品类型/边界场景未验证 |
+
+**Fix Result 为 Partially Fixed，因为存在 Unverified Items。**
+
+---
+
 ## Modified Files
 
 | File | Changes Summary |

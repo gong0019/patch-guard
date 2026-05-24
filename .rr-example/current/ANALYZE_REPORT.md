@@ -5,13 +5,36 @@ LOCKED
 
 ---
 
-## Problem
+## Problem Understanding (v2.0)
+
+**Analyze 阶段必须先确认问题本身，再做分类和边界。**
+
+### User Report
 
 用户报告：编辑产品页面时，variants 数据的回显丢失，保存后数据不完整。
 
+### Current Wrong Behavior
+
+编辑产品页面时：
+- variants 数据回显丢失（应该显示的数据没有显示）
+- 保存后数据不完整（保存的数据与预期不符）
+
+### Expected Behavior
+
+编辑产品页面时：
+- variants 数据正确回显
+- 保存后数据完整，与编辑时显示一致
+
+### Confirmation Needed
+
+已确认：
+- 问题发生在 ProductEditor.vue 中
+- 不涉及 workflow/warehouse 模块
+- 需要遵守 RR-001 规则
+
 ---
 
-## Problem Classification
+## Problem
 
 选择一项：
 

@@ -10,6 +10,111 @@
 
 ---
 
+## v2.0-alpha.2 (2024-05-24)
+
+### Release Summary
+
+Problem-Focused Governance 修正，让 PatchGuard 不只检查流程合规，还要检查原始问题是否被修复。
+
+**新增原则**：
+- Problem First, Process Second
+- Minimum Sufficient Artifact
+
+**新增章节**：
+- Problem Understanding（Analyze 阶段）
+- Fix Verification（Verify 阶段）
+
+---
+
+### New Principles
+
+#### Problem First, Process Second
+
+PatchGuard 的所有流程都必须服务于确认原始问题是否被修复。
+
+禁止为了填模板而填模板。
+
+流程合规不代表问题修复。
+
+#### Minimum Sufficient Artifact
+
+保持统一流程，不增加 Light / Full 模式。
+
+**小问题可以短写**：
+- 无关章节可以写 `N/A - not relevant to this patch`
+- 禁止编造风险、编造影响范围、编造规则
+
+**任何 patch 至少必须保留**：
+- Problem
+- Expected Behavior
+- Current Wrong Behavior
+- Boundary
+- Do Not Touch
+- Minimal Patch Plan
+- Fix Verification
+
+---
+
+### New Sections
+
+#### Problem Understanding (Analyze)
+
+Analyze 阶段必须先确认问题本身：
+- User Report
+- Current Wrong Behavior
+- Expected Behavior
+- Confirmation Needed
+
+如果未填写清楚，禁止进入 Problem Classification。
+
+#### Fix Verification (Verify)
+
+Verify 阶段必须先确认原始问题是否被修复：
+- Original Problem
+- Expected Behavior
+- Actual Behavior After Patch
+- Verification Method
+- Fix Result: Fixed / Not Fixed / Partially Fixed / Unknown
+
+如果 Fix Result 不是 Fixed，VERIFY_REPORT 不能是 PASS。
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| RR_SKILL.md | 增加 Core Principle、Minimum Sufficient Artifact、修正 WARNING 表述 |
+| templates/ANALYZE_REPORT.md | 增加 Problem Understanding 部分 |
+| templates/VERIFY_REPORT.md | 增加 Fix Verification 部分 |
+| .rr-example/current/ANALYZE_REPORT.md | 增加 Problem Understanding 示例 |
+| .rr-example/current/VERIFY_REPORT.md | 增加 Fix Verification 示例 |
+| README.md | 重写为项目入口文档 |
+| RR_Skill_Requirement.md | 标记为历史文档 |
+| VERSION.md | v2.0-alpha.2 记录 |
+
+---
+
+### README.md Rewrite
+
+重写顶层 README.md 为项目入口文档：
+
+- Project Overview
+- Why PatchGuard
+- What PatchGuard Is Not
+- Core Workflow
+- Key Principles
+- Quick Start
+- Repository Structure
+- Current Version（明确已支持/尚未支持）
+- Read Next
+
+移除 v2 Planning 中诱导进入 tools/AST 的表述。
+
+改为：**Future tool support should only be considered after the protocol proves useful in real patches.**
+
+---
+
 ## v2.0-alpha.1 (2024-05-24)
 
 ### Release Summary
