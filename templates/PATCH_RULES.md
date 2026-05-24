@@ -20,10 +20,9 @@ PATCH_RULES.md should contain only active, human-confirmed regression rules.
 
 **不是每个 bug 都写入 PATCH_RULES。**
 
-只有符合以下条件才写入：
-1. **重大 regression**
-2. **典型错误模式**
-3. **核心模块**
+AI may use the following criteria to propose an RR Candidate.
+These criteria are evidence for promotion, not automatic promotion rules.
+Only human-confirmed candidates can become active PATCH_RULES.
 
 **禁止**：将一次性 bug、低风险修复、简单 typo 写入长期规则。
 
@@ -150,6 +149,12 @@ If Promoted, assigned RR ID: RR-XXX
 
 ## Promotion Checklist
 
+**Mandatory**:
+| Criterion | Yes/No | Evidence |
+|-----------|--------|----------|
+| Human Decision = Promote? | **Required** | [human name, date] |
+
+**Evidence (at least one should match)**:
 | Criterion | Yes/No | Evidence |
 |-----------|--------|----------|
 | Has this error happened before? | | |
@@ -158,8 +163,14 @@ If Promoted, assigned RR ID: RR-XXX
 | Is the affected module explicitly marked as core? | | |
 | Would this rule prevent future scope creep or patch explosion? | | |
 | Is the rule specific and actionable? | | |
+
+**Blockers (any Yes = do not promote)**:
+| Criterion | Yes/No | Evidence |
+|-----------|--------|----------|
 | Does it duplicate an existing rule? | | |
 | Is it too narrow or one-off? | | |
+
+**Key Rule**: If Human Decision ≠ Promote, even with strong evidence, candidate cannot become active rule. |
 
 ---
 

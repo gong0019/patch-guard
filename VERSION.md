@@ -10,6 +10,102 @@
 
 ---
 
+## v2.0-alpha.4 (2024-05-24): Promote Criteria Clarification
+
+### Release Summary
+
+明确 Promote Criteria 语义：Human Confirmation 是唯一强制条件，其他 criteria 是 evidence。
+
+**核心修正**：
+- Human explicitly confirms Promote 是唯一 mandatory
+- Major Regression / Typical Error Pattern / Core Module 是 evidence，不是全部必选
+- AI cannot auto-promote based on criteria alone
+- 至少一项 evidence 匹配即可 propose，但必须 Human Promote 才能成为 active rule
+
+---
+
+### Fixes
+
+#### Promote Criteria Clarification
+
+**Before**（误导性表述）：
+```
+只有符合以下条件才 promote：
+- Major Regression: Yes
+- Typical Error Pattern: Yes
+- Core Module: Yes
+- Human Confirmation: Required
+```
+→ 容易被理解为三项全部 Yes 才能 Promote
+
+**After**（正确表述）：
+```
+Promotion requires:
+- Human explicitly confirms Promote
+
+And at least one of the following evidence criteria:
+- Major Regression
+- Typical Error Pattern
+- Core Module confirmed by human
+- Prevents future scope creep or patch explosion
+- Repeated error observed in previous patches
+
+Do not require all evidence criteria to be Yes.
+```
+
+#### Promotion Checklist Fix
+
+**Before**：所有 criteria 混在一起，无 mandatory vs evidence 区分
+
+**After**：
+```
+Mandatory:
+- Human Decision = Promote (Required)
+
+Evidence (at least one should match):
+- Has this error happened before?
+- Did it cause major regression?
+- Is it likely to recur?
+- ...
+
+Blockers (any Yes = do not promote):
+- Does it duplicate existing rule?
+- Is it too narrow?
+
+Key Rule: If Human Decision ≠ Promote, even with strong evidence, cannot become active.
+```
+
+#### templates/PATCH_RULES.md Fix
+
+**Before**：
+```
+只有符合以下条件才写入：
+1. 重大 regression
+2. 典型错误模式
+3. 核心模块
+```
+
+**After**：
+```
+AI may use the following criteria to propose an RR Candidate.
+These criteria are evidence for promotion, not automatic promotion rules.
+Only human-confirmed candidates can become active PATCH_RULES.
+```
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| RR_SKILL.md Promote Criteria | Human Confirmation 是唯一 mandatory，其他是 evidence |
+| docs/WORKFLOW.md Promote Criteria | 同步语义修正 |
+| templates/PATCH_RULES.md Important | 修正 "只有符合以下条件才写入" 表述 |
+| templates/PATCH_RULES.md Promotion Checklist | 区分 Mandatory / Evidence / Blockers |
+| VERSION.md | v2.0-alpha.4 记录 |
+
+---
+
 ## v2.0-alpha.3 补充 (2024-05-24): PATCH_RULES Promote Governance
 
 ### Release Summary

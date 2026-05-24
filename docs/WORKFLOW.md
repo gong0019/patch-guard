@@ -402,11 +402,19 @@ patch 完成后：
 
 ### Promote Criteria
 
-只有符合以下条件才 promote：
-- Major Regression: Yes（数据丢失/崩溃/核心功能失效）
-- Typical Error Pattern: Yes
-- Core Module: Yes（需 Human 确认）
-- Human Confirmation: Required
+**Promotion requires**:
+- Human explicitly confirms Promote
+
+And **at least one** of the following evidence criteria:
+- Major Regression（数据丢失/崩溃/核心功能失效）
+- Typical Error Pattern（典型 AI patch 错误）
+- Core Module confirmed by human
+- Prevents future scope creep or patch explosion
+- Repeated error observed in previous patches
+
+**Do not require all evidence criteria to be Yes.**
+
+AI may use these criteria to propose an RR Candidate, but cannot auto-promote based on criteria alone.
 
 ---
 
