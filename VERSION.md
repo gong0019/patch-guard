@@ -1,5 +1,71 @@
 # RR Skill Version Log
 
+## v1.1.1 (2024-05-24)
+
+### Release Summary
+
+V1.1 一致性和可读性修正，不增加新功能。
+
+**修正内容**：
+- Markdown 物理换行确认正常（已验证标题、列表独立行）
+- TASK_PACKET.md 同步新增文件规则（Allowed New Files、STOP 条件）
+- WORKFLOW Summary 状态语义修正（PASS/WARNING/FAIL 正确表达）
+- VERSION 历史规则歧义说明（v1.0 行为以最新版本为准）
+
+---
+
+### Fixes
+
+#### 1. Markdown 物理换行确认
+
+已验证所有文件格式正确：
+- 标题独立一行
+- 列表项独立一行
+- 表格正常 Markdown 格式
+- 代码块保留换行
+
+无单行 Markdown 文件。
+
+#### 2. TASK_PACKET.md 新增文件规则
+
+增加内容：
+- **Allowed New Files** 部分
+- **New Files Rule (v1.1)** 说明
+- **Stop Conditions (v1.1)** 增加新增文件条件
+- **硬规则**：实现需要新增文件但未声明 → STOP 并返回 rr analyze
+- Output Requirements 增加"新增文件列表"
+
+#### 3. WORKFLOW Summary 状态语义修正
+
+v1.1.0: `Verify | 检查合规，PASS 才提交`
+
+v1.1.1: `Verify | PASS 可进入人工审查；WARNING 必须人工验证；FAIL 必须回滚`
+
+消除过度简化表达，明确三种状态的真实含义。
+
+#### 4. VERSION 历史规则歧义说明
+
+在 v1.0.0 部分前增加：
+
+```
+## Historical Records Notice
+
+以下为历史版本记录。当前行为以 v1.1.0/v1.1.1 Status Definition / Hard Rules 为准。
+```
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| templates/TASK_PACKET.md | 增加 Allowed New Files、New Files Rule、Stop Conditions v1.1 |
+| docs/WORKFLOW.md | Summary 表格状态语义修正 |
+| .rr-example/current/TASK_PACKET.md | 同步 Allowed New Files 规则 |
+| VERSION.md | 增加历史规则歧义说明、v1.1.1 记录 |
+
+---
+
 ## v1.1.0 (2024-05-24)
 
 ### Release Summary
@@ -94,6 +160,14 @@ v1.1:
 2. 未列入 Allowed 的新增文件一律 FAIL
 3. PASS 不代表业务完全正确，只代表边界检查通过
 4. WARNING 必须人工验证后才能提交
+
+---
+
+## Historical Records Notice
+
+**以下为历史版本记录。当前行为以 v1.1.0/v1.1.1 Status Definition / Hard Rules 为准。**
+
+v1.0.0 的状态定义和规则已被 v1.1.0 修正，请参考最新版本。
 
 ---
 

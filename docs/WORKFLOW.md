@@ -361,4 +361,4 @@ ANALYZE_REPORT.md (LOCKED)
 | Analyze | 禁止改代码，先分析 |
 | Commit | 锁定计划，禁止变轨 |
 | Implement | 只改 Allowed，遵守边界 |
-| Verify | 检查合规，PASS 才提交 |
+| Verify | PASS 可进入人工审查；WARNING 必须人工验证；FAIL 必须回滚 |
