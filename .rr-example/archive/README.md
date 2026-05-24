@@ -6,11 +6,11 @@
 
 ---
 
-## Archive Structure
+## Archive Structure (v3.0)
 
 ```
 .rr/archive/
-├── YYYY-MM-DD-patch-XXX/
+├── <patch-id>/                   # 使用 patch-id 作为目录名
 │   ├── ANALYZE_REPORT.md
 │   ├── BOUNDARY.md
 │   ├── PATCH_PLAN.md
@@ -23,20 +23,18 @@
 
 ---
 
-## Archive Naming
+## Archive Naming (v3.0)
 
-格式：`YYYY-MM-DD-patch-XXX`
-
-- `YYYY-MM-DD`: patch 完成日期
-- `patch-XXX`: patch 序号或简短描述
+使用 **patch-id** 作为归档目录名：
 
 示例：
-- `2024-05-24-variants-echo-fix`
-- `2024-05-24-patch-001`
+- `2024-05-24-comment-replies`
+- `issue-123-fix-delete`
+- `sample-comment-replies`
 
 ---
 
-## Archive Process
+## Archive Process (v3.0)
 
 ```
 patch 完成 → VERIFY_REPORT PASS/WARNING → 人工确认 → 归档
@@ -45,20 +43,20 @@ patch 完成 → VERIFY_REPORT PASS/WARNING → 人工确认 → 归档
 ### Steps
 
 1. 确认 VERIFY_REPORT 状态为 PASS 或 WARNING（已人工验证）
-2. 创建归档目录：`.rr/archive/YYYY-MM-DD-patch-XXX/`
-3. 移动 `.rr/current/` 文件到归档目录
-4. 移动 `.rr/state/` 文件到归档目录
-5. 清空 `.rr/current/` 和 `.rr/state/`（准备下一个 patch）
-6. 评估是否 promote rule（写入 PATCH_RULES）
+2. 用户确认归档
+3. 移动 `.rr/patches/<patch-id>/` 到 `.rr/archive/<patch-id>/`
+4. 可开始下一个 patch
+
+**不再需要**：清空 `.rr/current/` 和 `.rr/state/`（v2.0 的做法）
 
 ---
 
-## Archive Lifecycle
+## Archive Lifecycle (v3.0)
 
 | Stage | Description |
 |-------|-------------|
-| Active | patch 进行中，文件在 `.rr/current/` |
-| Archived | patch 完成，文件移至 `.rr/archive/` |
+| Active | patch 进行中，文件在 `.rr/patches/<patch-id>/` |
+| Archived | patch 完成，文件移至 `.rr/archive/<patch-id>/` |
 | Promoted | 如果符合条件，规则写入 `.rr/rules/PATCH_RULES.md` |
 
 ---
@@ -80,7 +78,7 @@ patch 完成 → VERIFY_REPORT PASS/WARNING → 人工确认 → 归档
 
 ## Patch Info
 
-- Patch: [patch name]
+- Patch ID: [patch-id]
 - Date: [date]
 - Status: [PASS / WARNING]
 
@@ -88,14 +86,16 @@ patch 完成 → VERIFY_REPORT PASS/WARNING → 人工确认 → 归档
 
 | Criterion | Value | Notes |
 |-----------|-------|-------|
-| Severity | [High / Medium / Low] | [说明] |
-| Pattern | [Yes / No] | [说明] |
-| Recurrence Risk | [High / Medium / Low] | [说明] |
+| Human Confirmation | Required | 用户必须明确确认 Promote |
+| Major Regression | [Yes / No] | [说明] |
+| Typical Error Pattern | [Yes / No] | [说明] |
+| Core Module | [Yes / No] | [说明] |
 
 ## Decision
 
 - [ ] Promote to PATCH_RULES
-- [ ] Not Promote
+- [ ] Reject
+- [ ] Defer
 
 ## Reason
 

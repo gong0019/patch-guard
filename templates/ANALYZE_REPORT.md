@@ -1,11 +1,23 @@
-# RR Analyze Report
+# ANALYZE_REPORT.md
 
 ## Status
 [DRAFT / LOCKED]
 
 ---
 
-## Problem Understanding (v2.0)
+## Patch ID (v3.0)
+
+| Field | Value |
+|-------|-------|
+| Patch ID | [patch-id] |
+| Source | User provided / AI proposed |
+| Confirmed | [Yes / No - AI proposed must wait for user confirmation] |
+
+**如果 AI proposed 且用户未确认，不得创建 .rr/patches/<patch-id>/ 目录。**
+
+---
+
+## Problem Understanding (v3.0)
 
 **Analyze 阶段必须先确认问题本身，再做分类和边界。**
 

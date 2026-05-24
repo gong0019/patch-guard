@@ -1,11 +1,21 @@
-# RR Analyze Report
+# ANALYZE_REPORT.md
 
 ## Status
 LOCKED
 
 ---
 
-## Problem Understanding (v2.0)
+## Patch ID (v3.0)
+
+| Field | Value |
+|-------|-------|
+| Patch ID | sample-comment-replies |
+| Source | User provided |
+| Confirmed | Yes |
+
+---
+
+## Problem Understanding (v3.0)
 
 **Analyze 阶段必须先确认问题本身，再做分类和边界。**
 

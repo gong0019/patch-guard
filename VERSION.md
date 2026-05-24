@@ -1,4 +1,4 @@
-# RR Skill Version Log
+# PatchGuard Version Log
 
 ## Historical Records Notice
 
@@ -7,6 +7,150 @@
 当前行为规则只以最新版本和 `SKILL.md` 为准。
 
 历史版本中的状态定义、表述可能已过时，请参考最新版本。
+
+---
+
+## v3.0-beta (2024-05-24): Interaction Entry & Patch Session Directory Upgrade
+
+### Release Summary
+
+用户入口与 Patch Session Directory 结构升级。
+
+**核心变化**：
+- 用户-facing 命令改为单入口 `/PatchGuard`
+- analyze / lock / implement / verify / promote 改为内部阶段，自动推进
+- 新增 Patch ID 确认机制
+- 将 `.rr/current/` 和 `.rr/state/` 重构为 `.rr/patches/<patch-id>/`
+- CURRENT_STATE.md 和 LAST_LOCKED_PLAN.md 迁移到 patch session 目录
+- .rr/rules/ 保持全局长期规则
+- .rr/archive/<patch-id>/ 作为完成 patch 归档
+
+---
+
+### Key Changes
+
+#### 1. Single Entry Point
+
+**Before (v2.0)**:
+```
+RR 分析：[问题描述]
+确认计划
+开始执行
+RR 验证
+```
+
+**After (v3.0)**:
+```
+/PatchGuard
+
+Patch ID: 2026-05-24-comment-replies
+
+[需求描述]
+```
+
+用户只输入一个命令，内部阶段自动推进，只在关键确认点暂停。
+
+#### 2. Internal Phases (Not User Commands)
+
+| Phase | v2.0 | v3.0 |
+|-------|------|------|
+| Analyze | 用户输入 `RR 分析` | 自动进入 |
+| Lock | 用户输入 `确认计划` | 用户确认 `确认` 后自动进入 |
+| Implement | 用户输入 `开始执行` | 用户确认 `开始实现` 后自动进入 |
+| Verify | 用户输入 `RR 验证` | Implement 完成后自动进入 |
+
+#### 3. Patch ID Mechanism
+
+新增规则：
+- 用户可以显式提供 Patch ID
+- 如果用户没有提供，AI 可以提议 `Proposed Patch ID`
+- Proposed Patch ID 必须等待用户确认
+- 用户确认前不得创建 `.rr/patches/<patch-id>/` 目录
+- Lock 后不得修改 Patch ID
+
+#### 4. Directory Structure
+
+**Before (v2.0)**:
+```
+.rr/
+├── current/         # 全局唯一
+├── state/           # 全局唯一
+├── rules/
+└── archive/
+```
+
+**After (v3.0)**:
+```
+.rr/
+├── patches/
+│   └── <patch-id>/  # 每个 patch 独立目录
+│       ├── ANALYZE_REPORT.md
+│       ├── BOUNDARY.md
+│       ├── PATCH_PLAN.md
+│       ├── TASK_PACKET.md
+│       ├── VERIFY_REPORT.md
+│       ├── CURRENT_STATE.md
+│       └── LAST_LOCKED_PLAN.md
+│
+├── rules/
+│   ├── PATCH_RULES.md
+│   └── CORE_MODULES.md
+│
+└── archive/
+    └── <patch-id>/
+```
+
+**Key Changes**:
+- ❌ 不再使用 `.rr/current/` 作为全局唯一目录
+- ❌ 不再使用 `.rr/state/` 作为全局唯一目录
+- ✅ 每个 patch 拥有独立 `.rr/patches/<patch-id>/` 目录
+- ✅ 多 patch session 可并存
+
+#### 5. Pause Points
+
+| Pause Point | Wait For |
+|-------------|----------|
+| Analyze Result | Problem Understanding + Patch ID 确认 |
+| Locked Plan | 是否开始实现确认 |
+| Verify Result | 查看 VERIFY_REPORT |
+| RR Candidate | Promote / Reject / Defer 决定 |
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| SKILL.md | 完全重写，单入口 `/PatchGuard`，自动阶段推进，Patch ID 机制，新目录结构 |
+| README.md | 更新为单入口说明，新目录结构，移除手动阶段命令 |
+| docs/QUICK_START.md | 更新为 `/PatchGuard` 入口，Patch ID 规则，新目录结构 |
+| docs/WORKFLOW.md | 更新为内部阶段说明，Pause Points，Patch ID 规则 |
+| templates/ANALYZE_REPORT.md | 增加 Patch ID section |
+| templates/CURRENT_STATE.md | 增加 patch_id 字段，更新 Phase Flow |
+| templates/LAST_LOCKED_PLAN.md | 增加 Patch ID section |
+| .rr-example/current/ | 迁移到 .rr-example/patches/sample-comment-replies/ |
+| .rr-example/state/ | 迁移到 .rr-example/patches/sample-comment-replies/ |
+| .rr-example/rules/CORE_MODULES.md | 新增，核心模块列表示例 |
+| .rr-example/patches/README.md | 新增，patch session 结构说明 |
+
+---
+
+### Path Replacements
+
+所有 `.rr/current/` 和 `.rr/state/` 引用已替换为 `.rr/patches/<patch-id>/`
+
+---
+
+### Not Implemented
+
+以下功能未在 v3.0 实现：
+- tools/（辅助分析工具）
+- gates/（自动检查）
+- AST 解析
+- git diff 自动检查
+- multi-agent harness
+- 自动化脚本
+- Light / Full 模式
 
 ---
 

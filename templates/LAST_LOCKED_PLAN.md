@@ -2,11 +2,22 @@
 
 ## Purpose
 
-保存最近一次锁定的 Analyze 结果，防止 Implement 阶段重新解释需求。
+保存锁定的 Analyze 结果，防止 Implement 阶段重新解释需求。
+
+写入 `.rr/patches/<patch-id>/LAST_LOCKED_PLAN.md`
 
 ---
 
-## Hard Rule
+## Patch ID
+
+| Field | Value |
+|-------|-------|
+| Patch ID | [patch-id] |
+| Locked At | [timestamp] |
+
+---
+
+## Hard Rule (v3.0)
 
 **Implement 阶段禁止重新解释需求。**
 
@@ -15,8 +26,9 @@
 - 新增未 Allowed 文件
 - 修改 Forbidden 文件
 - 改变问题理解
+- 修改 Patch ID
 
-**必须 STOP 并返回 rr analyze**，而不是擅自修改 LAST_LOCKED_PLAN。
+**必须 STOP 并返回 Analyze**，而不是擅自修改 LAST_LOCKED_PLAN。
 
 ---
 
@@ -25,10 +37,11 @@
 ```markdown
 # Last Locked Plan
 
-## Lock Info
+## Patch ID
 
 | Field | Value |
 |-------|-------|
+| Patch ID | [patch-id] |
 | locked_at | [timestamp] |
 | locked_by | [user confirmation] |
 | analyze_version | [v3 / v4 / ...] |
@@ -82,9 +95,9 @@
 
 此文件只在以下情况更新：
 
-1. **用户确认新计划**：用户输入 `确认计划` 后生成
-2. **用户主动重新分析**：用户输入 `停止，重新分析` 后重新生成
-3. **FAIL 后重新分析**：VERIFY_REPORT 状态为 FAIL，返回 analyze 后重新生成
+1. **用户确认分析**：用户输入 `确认` 后生成
+2. **用户主动重新分析**：用户输入 `修改分析` 后重新生成
+3. **FAIL 后重新分析**：VERIFY_REPORT 状态为 FAIL，返回 Analyze 后重新生成
 
 **禁止 Implement 阶段擅自更新此文件。**
 

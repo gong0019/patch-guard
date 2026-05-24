@@ -2,7 +2,9 @@
 
 ## Purpose
 
-记录当前 RR 流程的阶段状态，防止阶段跳跃和状态丢失。
+记录当前 patch 的阶段状态，防止阶段跳跃和状态丢失。
+
+写入 `.rr/patches/<patch-id>/CURRENT_STATE.md`
 
 ---
 
@@ -10,7 +12,8 @@
 
 | Field | Value | Description |
 |-------|-------|-------------|
-| `current_phase` | [none / analyze / commit / implement / verify / done] | 当前所处阶段 |
+| `patch_id` | [patch-id] | 当前 patch ID |
+| `current_phase` | [none / analyze / locked / implement / verify / done] | 当前所处阶段 |
 | `locked` | [true / false] | Analyze 结果是否已锁定 |
 | `analyze_version` | [v1 / v2 / v3 / ...] | 当前 ANALYZE_REPORT 版本 |
 | `boundary_version` | [v1 / v2 / ...] | 当前 BOUNDARY 版本 |
@@ -19,31 +22,31 @@
 
 ---
 
-## Phase Flow
+## Phase Flow (v3.0)
 
 ```
-none → analyze (DRAFT) → analyze (LOCKED) → commit → implement → verify → done
+none → analyze (DRAFT) → analyze (LOCKED) → locked → implement → verify → done
 ```
 
 ### Valid Transitions
 
 | From | To | Condition |
 |------|-----|-----------|
-| none | analyze | 用户触发 `rr analyze` |
-| analyze (DRAFT) | analyze (LOCKED) | 用户输入 `确认计划` |
-| analyze (LOCKED) | commit | 状态已 locked |
-| commit | implement | 用户触发 `开始执行` |
-| implement | verify | 用户触发 `rr verify` |
+| none | analyze | 用户输入 `/PatchGuard` |
+| analyze (DRAFT) | analyze (LOCKED) | 用户确认 Patch ID + Problem Understanding |
+| analyze (LOCKED) | locked | 用户输入 `确认` |
+| locked | implement | 用户输入 `开始实现` |
+| implement | verify | Implement 完成，自动进入 |
 | verify | done | VERIFY_REPORT 状态为 PASS 或 WARNING（人工确认后） |
-| any | analyze | 用户输入 `停止，重新分析` |
+| any | analyze | 用户输入 `修改分析` 或 `回到 Analyze` |
 
 ### Invalid Transitions
 
 | From | To | Reason |
 |------|-----|--------|
-| none | commit | 必须先完成 analyze |
-| analyze (DRAFT) | implement | 必须先 LOCKED |
-| implement | commit | 禁止回退到 commit |
+| none | locked | 必须先完成 analyze |
+| analyze (DRAFT) | implement | 必须先 LOCKED + locked |
+| implement | locked | 禁止回退 |
 | verify | implement | 禁止回退（除非 FAIL） |
 
 ---
