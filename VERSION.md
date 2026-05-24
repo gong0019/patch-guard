@@ -10,6 +10,102 @@
 
 ---
 
+## v3.0.3 (2024-05-25): Pre-Lock Validation
+
+### Release Summary
+
+修复 Lock 阶段门禁问题，增加 Pre-Lock Validation 机制。
+
+**核心问题**：ANALYZE_REPORT.md 仍是 DRAFT 且有 Confirmation Needed，但 PatchGuard 仍生成 LOCKED 文件。
+
+**解决方案**：在 Analyze → Lock 之间增加 Pre-Lock Validation，检查 7 个 Gate。
+
+---
+
+### Key Changes
+
+#### 1. Pre-Lock Validation Mechanism
+
+新增 Phase 1.5: Pre-Lock Validation
+
+在 Analyze 之后、Lock 之前。
+
+只有 Validation 通过，才能进入 Lock。
+
+如果失败：
+- CURRENT_STATE = ANALYZE_DRAFT
+- 列出 Blocking Questions
+- 不生成 LOCKED 文件
+
+#### 2. Seven Gates
+
+| Gate | Rule |
+|------|------|
+| Confirmation Gate | Confirmation Needed 非空 → 禁止 Lock |
+| Scope Split Gate | 多个独立功能 → 询问是否拆分 |
+| Boundary Consistency Gate | TASK/PATCH_PLAN 文件必须在 Allowed Files |
+| Allowed Files Completeness Gate | 修改文件必须列入 Allowed |
+| P0/P1/P2 Separation Gate | TASK_PACKET 只能包含 P0 |
+| Dependency Decision Gate | 未确认外部依赖 → 禁止 Lock |
+| Widget/File Name Consistency Gate | 新组件名必须有 Allowed 或复用 |
+
+#### 3. CURRENT_STATE Locked Conditions
+
+只有以下条件全部满足才能写 current_phase = locked：
+
+| Condition | Check |
+|-----------|-------|
+| Confirmation Needed = empty | |
+| Patch ID 已确认 | |
+| Pre-Lock Validation 通过 | |
+| Boundary 无冲突 | |
+| P0/P1/P2 已分离 | |
+| 外部依赖已确认 | |
+| 用户明确确认 Lock | |
+
+否则必须写 ANALYZE_DRAFT + Blocking Questions。
+
+#### 4. LAST_LOCKED_PLAN Generation Rules
+
+只有进入 LOCKED_PLAN 后才允许生成。
+
+如果 Analyze 仍是 DRAFT：
+- 不得生成
+- 已生成的标记为 INVALIDATED
+
+#### 5. TASK_PACKET Generation Rules
+
+TASK_PACKET 只有在 LOCKED_PLAN 后才能成为可执行工单。
+
+Analyze Draft 阶段只能生成 TASK_PACKET_DRAFT 或不生成。
+
+---
+
+### File Changes
+
+| File | Change |
+|------|--------|
+| SKILL.md | 新增 Pre-Lock Validation 章节，7 个 Gate 定义 |
+| docs/WORKFLOW.md | 新增 Pre-Lock Validation 章节 |
+| docs/QUICK_START.md | 新增 Pre-Lock Validation 章节 |
+| templates/ANALYZE_REPORT.md | 新增 Pre-Lock Validation Status 章节 |
+| templates/CURRENT_STATE.md | 新增 validation_passed、blocking_questions 字段，Locked Conditions |
+| templates/LAST_LOCKED_PLAN.md | 新增 Generation Rules、INVALIDATED 状态 |
+| templates/TASK_PACKET.md | 新增 Generation Rules、P0/P1/P2 Separation |
+| VERSION.md | 新增 v3.0.3 记录 |
+
+---
+
+### Hard Rules (v3.0.3)
+
+1. **Confirmation Needed 非空 → 禁止 Lock**
+2. **Pre-Lock Validation 未通过 → 禁止 Lock**
+3. **P1/P2 混入 TASK_PACKET → 返回 Analyze**
+4. **未确认依赖 → 禁止 Lock**
+5. **文件不在 Allowed → 禁止 Lock 或移出 patch**
+
+---
+
 ## v3.0.2 (2024-05-24): Activation Rule Check
 
 ### Release Summary

@@ -145,6 +145,99 @@ AI 只能：
 
 ---
 
+## Pre-Lock Validation (v3.0)
+
+### Purpose
+
+**在 Analyze 进入 Lock 之前，必须做一致性检查。**
+
+只有 Pre-Lock Validation 通过，才能进入 Lock。
+
+如果失败，必须保持状态为 ANALYZE_DRAFT，列出 Blocking Questions。
+
+---
+
+### Seven Gates
+
+#### Gate 1: Confirmation Gate
+
+**Confirmation Needed 非空 → 禁止进入 Lock。**
+
+| Rule | Enforcement |
+|------|-------------|
+| Confirmation Needed 非空 | CURRENT_STATE = ANALYZE_DRAFT |
+| Confirmation Needed 非空 | 不生成 LOCKED_PLAN |
+| Confirmation Needed 非空 | 不生成可执行 TASK_PACKET |
+
+#### Gate 2: Scope Split Gate
+
+**多个独立功能/风险域 → 必须询问是否拆分。**
+
+Split Detection:
+- 功能可独立交付
+- 风险不同
+- 依赖不同
+
+用户确认前不得 Lock。
+
+#### Gate 3: Boundary Consistency Gate
+
+**TASK/PATCH_PLAN 文件必须出现在 Allowed Files。**
+
+Forbidden 冲突 → 禁止 Lock。
+
+#### Gate 4: Allowed Files Completeness Gate
+
+**修改文件必须出现在 Allowed Files。**
+
+不在 Allowed Files → 二选一：
+- 加入 Allowed Files
+- 移出当前 patch
+
+#### Gate 5: P0/P1/P2 Separation Gate
+
+**TASK_PACKET 只能包含 P0。**
+
+P1/P2 混入 → 返回 Analyze 移除。
+
+#### Gate 6: Dependency Decision Gate
+
+**未确认外部依赖 → 禁止 Lock。**
+
+用户确认依赖选择，或将功能移出。
+
+#### Gate 7: Widget/File Name Consistency Gate
+
+**新组件名必须有 Allowed Files 或复用已有文件。**
+
+---
+
+### Validation Result
+
+| Result | Action |
+|--------|--------|
+| All Pass | 进入 Lock，生成 LOCKED 文件 |
+| Any Fail | ANALYZE_DRAFT + Blocking Questions |
+
+Blocking Questions Format:
+
+```
+Pre-Lock Validation Failed
+
+Blocking Questions:
+1. [Confirmation Needed]
+2. [Scope Split]
+3. [Boundary conflict]
+4. [Allowed Files missing]
+5. [P1/P2 in TASK_PACKET]
+6. [Dependency unconfirmed]
+7. [Widget/File inconsistent]
+
+请逐一回答，确认后进入 Lock。
+```
+
+---
+
 ## Important: V3 Limitations
 
 **V3-beta 是 Prompt Protocol，不是自动验证工具。**

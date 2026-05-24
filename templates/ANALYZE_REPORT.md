@@ -37,7 +37,46 @@
 
 [需要与用户确认的问题点，如有]
 
+**Confirmation Needed 规则：**
+- 如果 Confirmation Needed 非空，Status 必须是 DRAFT
+- Confirmation Needed 非空时，禁止进入 Lock
+- Confirmation Needed 非空时，禁止生成 TASK_PACKET
+
+示例 Confirmation Needed：
+- 是否拆分 patch（activity-timeline vs global-quick-capture）
+- 外部依赖选择（hotkey_manager vs macos_global_shortcut）
+- Widget 命名选择（ActivityTimelineWidget vs ActivityTimelineScreen）
+- 是否包含 AI activity
+
 **如果 User Report / Current Wrong Behavior / Expected Behavior 未填写清楚，禁止进入 Problem Classification。**
+
+---
+
+## Pre-Lock Validation Status (v3.0)
+
+### Gate Check Results
+
+| Gate | Status | Notes |
+|------|--------|-------|
+| Confirmation Gate | [pass / fail] | Confirmation Needed = [empty / has items] |
+| Scope Split Gate | [pass / fail / skip] | [single scope / split detected / not applicable] |
+| Boundary Consistency Gate | [pending] | 待 BOUNDARY.md 生成后检查 |
+| Allowed Files Completeness Gate | [pending] | 待 BOUNDARY.md 生成后检查 |
+| P0/P1/P2 Separation Gate | [pending] | 待 TASK_PACKET.md 生成后检查 |
+| Dependency Decision Gate | [pass / fail / skip] | [confirmed / unconfirmed / not applicable] |
+| Widget/File Name Consistency Gate | [pass / fail] | [consistent / inconsistent] |
+
+### Blocking Questions (if any gate = fail)
+
+如果任何 Gate 为 fail，列出 Blocking Questions：
+
+1. [question from Confirmation Needed]
+2. [question from Scope Split]
+3. [question from Dependency]
+4. [question from Widget/File Name]
+...
+
+**Blocking Questions 非空时，Status 必须保持 DRAFT。**
 
 ---
 

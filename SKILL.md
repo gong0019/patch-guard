@@ -247,7 +247,10 @@ Analyze (自动)
 ↓
 [暂停] 等待用户确认：Problem Understanding + Patch ID
 ↓
-用户确认 "确认" / "修改分析" / "缩小边界"
+Pre-Lock Validation (自动检查)
+↓
+如果 Validation 通过 → Lock
+如果 Validation 失败 → 返回 Analyze DRAFT + 列出 Blocking Questions
 ↓
 Lock (自动)
 ↓
@@ -266,7 +269,180 @@ Verify (自动)
 归档到 .rr/archive/<patch-id>/ 或继续下一个 patch
 ```
 
-### User Commands at Pause Points
+---
+
+## Pre-Lock Validation (v3.0)
+
+### Purpose
+
+**在 Analyze 进入 Lock 之前，必须做一致性检查。**
+
+只有 Pre-Lock Validation 通过，才能进入 Lock。
+
+如果失败，必须保持状态为 ANALYZE_DRAFT，并向用户提出需要确认的问题。
+
+**禁止在未确认状态下生成 LOCKED 文件。**
+
+---
+
+### Gate 1: Confirmation Gate
+
+**如果 ANALYZE_REPORT.md 中存在任何 Confirmation Needed，禁止进入 Lock。**
+
+Confirmation Needed 包括：
+- 是否拆分 patch
+- 外部依赖选择（如 hotkey_manager vs macos_global_shortcut）
+- 架构选择
+- 插件选择
+- 是否包含某个功能
+- 是否允许修改某些文件
+- Widget / 文件命名选择
+
+| Rule | Enforcement |
+|------|-------------|
+| Confirmation Needed 非空 | CURRENT_STATE = ANALYZE_DRAFT |
+| Confirmation Needed 非空 | 不生成 LOCKED_PLAN |
+| Confirmation Needed 非空 | 不生成可执行 TASK_PACKET |
+| Confirmation Needed 非空 | 列出 Blocking Questions |
+
+---
+
+### Gate 2: Scope Split Gate
+
+**如果本次 patch 包含多个独立功能或多个风险域，必须先询问用户是否拆分。**
+
+Split Detection Criteria:
+- 功能可以独立交付
+- 风险不同
+- 依赖不同
+- 修改文件集不同
+
+例如：
+- Timeline / Activity Log
+- Global Quick Capture
+
+如果检测到 Split Candidate：
+
+```
+Scope Split Detected:
+- Feature A: [description]
+- Feature B: [description]
+
+请选择：
+1. 合并为一个 patch（需说明安全性）
+2. 拆分为多个 patch
+```
+
+用户确认前不得 Lock。
+
+---
+
+### Gate 3: Boundary Consistency Gate
+
+**检查 BOUNDARY.md、PATCH_PLAN.md、TASK_PACKET.md 是否一致。**
+
+| Check | Rule |
+|-------|------|
+| TASK_PACKET 文件 | 必须出现在 BOUNDARY Allowed Files |
+| PATCH_PLAN 文件 | 必须出现在 BOUNDARY Allowed Files |
+| Forbidden Files | TASK_PACKET 不得触碰 |
+| Forbidden Behaviors | TASK_PACKET 不得包含 |
+
+如果 Task 和 Forbidden 冲突，禁止 Lock。
+
+---
+
+### Gate 4: Allowed Files Completeness Gate
+
+**所有需要修改的文件必须出现在 BOUNDARY Allowed Files。**
+
+如果 ANALYZE_REPORT / PATCH_PLAN / TASK_PACKET 提到某个文件需要修改：
+
+| File Status | Action |
+|-------------|--------|
+| 在 Allowed Files | 继续 |
+| 不在 Allowed Files | 必须二选一 |
+
+二选一：
+- 加入 Allowed Files + 说明原因
+- 移出当前 patch → Future Work / Out of Scope
+
+用户确认前不得 Lock。
+
+---
+
+### Gate 5: P0 / P1 / P2 Separation Gate
+
+**TASK_PACKET 只能包含本轮要实现的 P0。**
+
+| Priority | Allowed Location |
+|----------|------------------|
+| P0 | TASK_PACKET.md（本轮实现） |
+| P1 | Future Work（不纳入 TASK_PACKET） |
+| P2 | Out of Scope（不纳入文档） |
+
+**禁止把 P1 / P2 混入 TASK_PACKET。**
+
+如果 TASK_PACKET 包含 P1/P2：
+- 返回 Analyze
+- 移除 P1/P2
+- 用户确认后才能 Lock
+
+---
+
+### Gate 6: Dependency Decision Gate
+
+**如果存在未确认外部依赖或插件选择，禁止 Lock。**
+
+例如：
+- hotkey_manager vs macos_global_shortcut
+
+必须先让用户确认：
+- 使用哪个依赖
+- 或将相关功能移出当前 patch
+
+---
+
+### Gate 7: Widget / File Name Consistency Gate
+
+**如果 TASK_PACKET 出现新组件名，必须满足以下之一：**
+
+| Condition | Action |
+|-----------|--------|
+| BOUNDARY Allowed Files 包含对应新文件 | 继续 |
+| PATCH_PLAN 明确复用已有文件 | 继续 |
+| TASK_PACKET 改为实际存在或允许创建的文件名 | 继续 |
+| 以上都不满足 | 禁止 Lock |
+
+---
+
+### Pre-Lock Validation Result
+
+| Result | Action |
+|--------|--------|
+| All Gates Pass | 进入 Lock，生成 LOCKED 文件 |
+| Any Gate Fail | 保持 ANALYZE_DRAFT，列出 Blocking Questions |
+
+Blocking Questions Format:
+
+```
+Pre-Lock Validation Failed
+
+Blocking Questions:
+1. [Confirmation Needed item]
+2. [Scope Split candidate]
+3. [Boundary conflict]
+4. [Allowed Files missing]
+5. [P1/P2 in TASK_PACKET]
+6. [Dependency unconfirmed]
+7. [Widget/File name inconsistent]
+
+请逐一回答以上问题，确认后才能进入 Lock。
+```
+
+---
+
+## Internal Phases (v3.0)
 
 用户在暂停点可以输入：
 

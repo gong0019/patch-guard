@@ -1,8 +1,47 @@
-# AI Task Packet
+# TASK_PACKET.md
+
+## Generation Rules (v3.0)
+
+**TASK_PACKET 只有在 LOCKED_PLAN 后才能成为可执行工单。**
+
+如果还在 Analyze Draft 阶段：
+- ❌ 不得生成 TASK_PACKET.md（可执行）
+- ✅ 只能生成 TASK_PACKET_DRAFT.md（草案）
+- ✅ 或不生成
+
+**禁止在未确认状态下生成可执行 TASK_PACKET。**
+
+---
+
+## P0/P1/P2 Separation (v3.0)
+
+### Priority Definition
+
+| Priority | Definition | Allowed Location |
+|----------|------------|------------------|
+| P0 | 本轮必须实现的核心功能 | TASK_PACKET.md |
+| P1 | 后续可实现的功能 | Future Work（不纳入 TASK_PACKET） |
+| P2 | 明确排除的功能 | Out of Scope（不纳入文档） |
+
+### Hard Rule
+
+**TASK_PACKET 只能包含 P0。**
+
+禁止：
+- ❌ 把 P1 混入 TASK_PACKET
+- ❌ 把 P2 混入 TASK_PACKET
+- ❌ 在 TASK_PACKET 中标注 P1/P2
+
+如果检测到 P1/P2 在 TASK_PACKET：
+- 返回 Analyze
+- 移除 P1/P2
+- 用户确认后才能 Lock
+
+---
 
 ## Objective
 
-[本次修改的具体目标，一句话描述]
+[本次修改的具体目标，一句话描述 - 只包含 P0]
 
 ---
 

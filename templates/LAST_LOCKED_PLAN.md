@@ -1,5 +1,25 @@
 # LAST_LOCKED_PLAN.md
 
+## Generation Rules (v3.0)
+
+**只有进入 LOCKED_PLAN 后，才允许生成 LAST_LOCKED_PLAN.md。**
+
+禁止条件：
+- Analyze 仍是 DRAFT → ❌ 不得生成
+- Confirmation Needed 非空 → ❌ 不得生成
+- Pre-Lock Validation 未通过 → ❌ 不得生成
+- 用户未确认 Lock → ❌ 不得生成
+
+如果之前已生成但条件不满足：
+
+```
+Status: INVALIDATED
+Reason: Analyze still has unresolved confirmation questions.
+Invalidated At: [timestamp]
+```
+
+---
+
 ## Purpose
 
 保存锁定的 Analyze 结果，防止 Implement 阶段重新解释需求。
@@ -14,6 +34,7 @@
 |-------|-------|
 | Patch ID | [patch-id] |
 | Locked At | [timestamp] |
+| Pre-Lock Validation | [passed / failed - if failed, this file is INVALIDATED] |
 
 ---
 

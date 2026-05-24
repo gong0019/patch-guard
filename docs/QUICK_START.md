@@ -131,6 +131,44 @@ Next Step: Problem Understanding
 
 ---
 
+## Pre-Lock Validation (v3.0)
+
+### Purpose
+
+**Analyze → Lock 之前必须做一致性检查。**
+
+只有 Validation 通过，才能进入 Lock。
+
+### Seven Gates
+
+| Gate | Rule |
+|------|------|
+| Confirmation Gate | Confirmation Needed 非空 → 禁止 Lock |
+| Scope Split Gate | 多个独立功能 → 询问是否拆分 |
+| Boundary Consistency Gate | TASK 文件必须在 Allowed Files |
+| Allowed Files Completeness Gate | 修改文件必须列入 Allowed |
+| P0/P1/P2 Separation Gate | TASK_PACKET 只能包含 P0 |
+| Dependency Decision Gate | 未确认依赖 → 禁止 Lock |
+| Widget/File Name Gate | 新组件名必须有 Allowed 或复用 |
+
+### Validation Failed
+
+如果任何 Gate 失败：
+
+```
+Pre-Lock Validation Failed
+
+Blocking Questions:
+1. [question]
+2. [question]
+
+请逐一回答，确认后进入 Lock。
+```
+
+**Blocking Questions 非空时，Status 必须保持 DRAFT。**
+
+---
+
 ## Quick Start
 
 ### Single Entry Point: /PatchGuard
