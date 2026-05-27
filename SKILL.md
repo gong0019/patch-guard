@@ -242,7 +242,8 @@ Proposed Patch ID: comment-replies
 | Analyze | 分析问题，输出 ANALYZE_REPORT.md (DRAFT) | ✅ 等待用户确认 Problem Understanding + Patch ID |
 | Lock | 确认后生成 BOUNDARY.md, PATCH_PLAN.md, TASK_PACKET.md | ✅ 等待用户确认是否开始实现 |
 | Implement | 按 TASK_PACKET.md 约束修改代码 | ❌ 自动进入 Verify |
-| Verify | 输出 VERIFY_REPORT.md | ✅ Optional: 询问是否生成 RR Candidate |
+| Verify | 输出 VERIFY_REPORT.md，进入 Human Review | ✅ 等待 Human Review |
+| Human Review | Human 审查 VERIFY_REPORT 和实际修改 | ✅ ACCEPTED / REOPENED / REJECTED / NEEDS_MANUAL_CHECK |
 | Promote | 用户决定 Promote / Reject / Defer | ✅ 用户必须明确决定 |
 
 ### Flow
@@ -269,9 +270,9 @@ Implement (自动)
 ↓
 Verify (自动)
 ↓
-[暂停] 输出 VERIFY_REPORT，Optional: 询问 RR Candidate
+[暂停] 输出 VERIFY_REPORT，进入 Human Review
 ↓
-用户决定 Promote / Reject / Defer / 无需规则
+Human ACCEPTED 后，用户决定 Promote / Reject / Defer / 无需规则
 ↓
 归档到 .rr/archive/<patch-id>/ 或继续下一个 patch
 ```
@@ -857,6 +858,10 @@ Proposed Patch ID: [根据需求生成的 patch-id]
 
 在进入 Verify 阶段前，AI 必须首先检查代码审查依赖 skill 是否已安装并可用。
 
+`mr-review` 是 Verify 阶段的 static review dependency。它用于增强代码审查，不是最终业务验收。`mr-review` PASS 不等于 patch ACCEPTED。
+
+`mr-review` 只属于 Verify 阶段。缺失不得阻塞 Activation、Analyze、Pre-Lock Validation、Lock 或 Implement，只能影响 Verify 状态。
+
 **Dependency**:
 - Skill name: `mr-review` / `mr_review`
 - Default source: `https://github.com/gong0019/mr_review.git`
@@ -870,11 +875,21 @@ Proposed Patch ID: [根据需求生成的 patch-id]
 4. 当前工作区内显式配置的 dependency path
 
 **If missing**:
-- AI 必须下载/安装该 review skill 到可写、可复用的 skills root。
-- 下载目标不得写死为某个用户、某个机器或某个 agent 私有路径。
-- 若没有宿主环境提供的安装器，可使用 Git 从 Default source 下载到已确定的 skills root。
-- 若运行环境需要用户授权网络访问或文件写入，AI 必须请求授权；授权被拒绝或下载失败时，VERIFY_REPORT 必须记录 `MR-Review Dependency: Missing`，且最终状态不能为 PASS。
+- AI 可以报告 `Missing`。
+- AI 可以说明推荐安装方式和推荐安装路径。
+- AI must request explicit human authorization before downloading or installing `mr-review`.
+- 未获得用户明确授权前，AI 不得 git clone、下载、写入 skills root 或修改任何 skill 安装目录。
+- 授权后，下载目标不得写死为某个用户、某个机器或某个 agent 私有路径。
+- 授权后若没有宿主环境提供的安装器，可使用 Git 从 Default source 下载到已确定的 skills root。
+- 用户拒绝授权或下载失败时，VERIFY_REPORT 必须记录 `MR-Review Dependency: Missing`，状态只能是 WARNING 或 FAIL，不能为 PASS。
 - 下载后必须重新检查 Required files 是否存在；检查失败时不得声称已执行 `mr-review`。
+
+**Installation audit record**:
+- source URL
+- commit hash / tag / version
+- install path
+- required files check result
+- whether installation succeeded
 
 ### Hard Rule: mr-review Integration (Static Verification Core)
 
@@ -884,6 +899,7 @@ AI 必须针对当前 Patch 的 Git Diff 执行 `mr-review` 审查流：
 - **跨边界追踪**：在变更跨越 API、模板、DOM、配置、数据层或构建边界时，结合 `context-reader.md` 追踪被修改或删除的标识符、API 契约、页面模板变量等跨文件/跨层级的“隐性契约”。
 - **证据要求**：VERIFY_REPORT 必须记录 review skill 的解析路径、是否安装、覆盖的文件范围和未验证项。
 - **阻断红线**：若 `mr-review` 发现了任何 **Confirmed Bugs**，或者发现了超出 `Allowed Files` 锁定的修改文件，**VERIFY_REPORT 状态必须判定为 FAIL**，拒绝通过该补丁。
+- **缺失处理**：如果 `mr-review` 缺失、用户拒绝安装、安装失败或 Required files 检查失败，不得声称已执行 `mr-review`；必须记录 `Unverified Item: mr-review not executed`，VERIFY_REPORT 状态只能是 WARNING 或 FAIL。
 
 ### Hard Rule: Fix Verification First
 
@@ -900,9 +916,19 @@ AI 必须针对当前 Patch 的 Git Diff 执行 `mr-review` 审查流：
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | Fix Result=Fixed、`mr-review` 无 Confirmed Bugs、无越界、无 Forbidden、无未验证关键项 | ✅ 边界与代码质量检查均通过，可进入人工审查 |
+| PASS | Fix Result=Fixed、`mr-review` 无 Confirmed Bugs、无越界、无 Forbidden、无未验证关键项 | ✅ 边界与代码质量检查通过，但仍必须进入 Human Review |
 | WARNING | Fix Result=Partially Fixed、`mr-review` 缺失/安装失败、或 `mr-review` 发现部分非致命 Risks/Edge Cases，但无 Confirmed Bugs、无越界、无 Forbidden | ⚠️ 必须人工验证 Unverified Items 后决定 |
 | FAIL | `mr-review` 发现任何 Confirmed Bugs、Fix Result=Not Fixed/Unknown、触碰 Forbidden、超出 Allowed | ❌ 必须停止，根据风险决定回滚或返回 Analyze |
+
+### Hard Rule: Human Review Gate
+
+Verify 完成后必须进入 Human Review。
+
+- 即使 `mr-review` 通过，patch 仍然必须进入 Human Review。
+- Human 未 ACCEPTED 前，不得 archive。
+- Human 未 ACCEPTED 前，不得开始下一个 patch。
+- `mr-review` PASS 不等于 Human ACCEPTED。
+- VERIFY_REPORT 默认 Human Status 必须是 `PENDING` 或 `NEEDS_MANUAL_CHECK`，不能默认 `ACCEPTED`。
 
 ### Important Notes
 
@@ -916,7 +942,7 @@ AI 必须针对当前 Patch 的 Git Diff 执行 `mr-review` 审查流：
 
 ### Trigger
 
-- Verify 完成
+- Verify 完成且 Human Review 状态为 ACCEPTED
 - 发现可复用 regression pattern
 - AI 询问用户是否生成 RR Candidate
 
@@ -927,7 +953,7 @@ AI 必须针对当前 Patch 的 Git Diff 执行 `mr-review` 审查流：
 ### Process
 
 ```
-Verify 完成 → AI 发现 regression pattern → 询问用户是否生成 RR Candidate
+Verify 完成 → Human ACCEPTED → AI 发现 regression pattern → 询问用户是否生成 RR Candidate
 ↓
 用户决定：生成 / 不生成
 ↓
@@ -962,7 +988,8 @@ And **at least one** evidence criterion:
 
 ### When to Archive
 
-- Verify PASS 或 WARNING（已人工验证）
+- VERIFY_REPORT 已生成
+- Human Review 状态为 ACCEPTED
 - 用户确认归档
 
 ### Steps

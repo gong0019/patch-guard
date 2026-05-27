@@ -39,11 +39,15 @@ PatchGuard 通过结构化流程解决这些问题。
 
 Verify 阶段必须先检测代码审查依赖 skill：`mr-review` / `mr_review`。
 
+`mr-review` 是 Verify 阶段的 static review dependency。它用于增强代码审查，不是最终业务验收。`mr-review` PASS 不等于 patch ACCEPTED。
+
 - 优先使用当前运行环境已暴露的同名 skill
 - 其次检查 PatchGuard 同级目录中的 `../mr_review` 或 `../mr-review`
-- 缺失时必须下载/安装到可写、可复用的 skills root
+- 缺失时可以报告 Missing、说明推荐安装方式，并请求用户授权安装
+- 未获得用户明确授权前，不得 git clone、下载或写入 skills root
 - 安装目标不得写死为某个用户、某个机器或某个 agent 私有路径
-- 若安装失败或未获授权，VERIFY_REPORT 必须记录缺口，最终状态不能为 PASS
+- 若安装失败、未获授权或 required files 检查失败，VERIFY_REPORT 必须记录 `Unverified Item: mr-review not executed`，最终状态不能为 PASS
+- Verify 后仍必须进入 Human Review；Human 未 ACCEPTED 前不得 archive 或开始下一个 patch
 
 ---
 
@@ -159,7 +163,9 @@ Analyze (自动) → [暂停] 等待确认
 ↓
 [暂停] 输出 VERIFY_REPORT
 ↓
-Optional: Promote RR Candidate
+Human Review → ACCEPTED / REOPENED / REJECTED / NEEDS_MANUAL_CHECK
+↓
+Human ACCEPTED 后 Optional: Promote RR Candidate
 ↓
 归档
 ```
@@ -177,6 +183,8 @@ Optional: Promote RR Candidate
 | Patch ID Must Confirm | AI 可以提议，但必须用户确认 |
 | Locked Plan Cannot Change | Lock 后不得修改 Patch ID 或边界 |
 | Problem First, Process Second | 流程服务于问题修复 |
+| mr-review Is Static Review | `mr-review` 只属于 Verify，不是业务验收 |
+| Human Review Required | `mr-review` PASS 不等于 Human ACCEPTED |
 | Human Controls Promote | AI 提议，Human 决定 |
 
 ---
@@ -214,7 +222,8 @@ AI 会自动：
 |--------------------|------------|
 | Analyze Result | `确认` / `修改分析` / `缩小边界` |
 | Locked Plan | `开始实现` / `修改分析` |
-| Verify Result | 查看 VERIFY_REPORT，决定是否提交 |
+| Verify Result | 查看 VERIFY_REPORT，进入 Human Review |
+| Human Review | `ACCEPTED` / `REOPENED` / `REJECTED` / `NEEDS_MANUAL_CHECK` |
 | RR Candidate | `Promote` / `Reject` / `Defer` |
 
 **不需要手动触发阶段命令。**

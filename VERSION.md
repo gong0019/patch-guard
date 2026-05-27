@@ -10,6 +10,21 @@
 
 ---
 
+## v3.1.1 (2026-05-27): mr-review Authorization and Human Review Gate
+
+### Release Summary
+
+收紧 `mr-review` 依赖安装权限，并明确 Verify 后必须进入 Human Review。
+
+**核心改动**：
+1. **安装权限收紧**：禁止无授权自动安装 `mr-review`。缺失时 AI 只能报告 Missing、说明推荐安装方式，并请求用户明确授权。
+2. **安装可审计**：授权安装后必须记录 source URL、commit hash / tag / version、install path、required files check result 和 installation result。
+3. **Verify-only dependency**：`mr-review` 只属于 Verify 阶段，缺失不得阻塞 Activation、Analyze、Pre-Lock Validation、Lock 或 Implement。
+4. **验收语义收紧**：`mr-review` PASS 不等于 Human ACCEPTED；Verify 后必须进入 Human Review。
+5. **Human Review Gate**：Human 未 ACCEPTED 前不得 archive，也不得开始下一个 patch。
+
+---
+
 ## v3.1.0 (2026-05-27): mr-review Integration & Portable Dependency Install
 
 ### Release Summary

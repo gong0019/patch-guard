@@ -39,9 +39,21 @@ PatchGuard 是一个 **AI Patch Governance System**，用于治理 AI Coding 工
 
 | Status | Condition | Meaning |
 |--------|-----------|---------|
-| PASS | 无越界、无 Forbidden、`mr-review` 无 Confirmed Bugs、无未验证关键项 | 边界与代码质量检查均通过，可进入人工审查 |
+| PASS | 无越界、无 Forbidden、`mr-review` 无 Confirmed Bugs、无未验证关键项 | 边界与代码质量检查通过，但仍必须进入 Human Review |
 | WARNING | 无越界、无 Forbidden，`mr-review` 无 Confirmed Bugs，但存在未验证项、部分修复或 review skill 缺失/安装失败 | **必须人工验证 Unverified Items 后决定** |
 | FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、`mr-review` 发现 Confirmed Bugs | 必须停止，根据风险决定回滚或返回 Analyze |
+
+---
+
+## mr-review Dependency
+
+`mr-review` 是 Verify 阶段的 static review dependency，用于增强代码审查，不是业务验收。
+
+- 缺失时不得自动 git clone、下载或写入 skills root
+- AI 必须先报告 Missing，并请求用户明确授权安装
+- 用户拒绝授权、安装失败或 required files 检查失败时，VERIFY_REPORT 不能是 PASS
+- `mr-review` PASS 不等于 Human ACCEPTED
+- Verify 后仍必须进入 Human Review
 
 ---
 
@@ -214,6 +226,8 @@ Implement (自动) → Verify (自动)
 ↓
 [暂停] 输出 VERIFY_REPORT
 ↓
+Human Review → 用户 ACCEPTED / REOPENED / REJECTED / NEEDS_MANUAL_CHECK
+↓
 Optional: RR Candidate → 用户决定
 ↓
 归档
@@ -232,6 +246,10 @@ Optional: RR Candidate → 用户决定
 | `开始实现` | 确认 Lock，进入 Implement |
 | `停止` | 立即停止 |
 | `回到 Analyze` | 返回 Phase 1 |
+| `ACCEPTED` | Human Review 接受当前 patch |
+| `REOPENED` | Human Review 要求重新打开并返回 Analyze |
+| `REJECTED` | Human Review 拒绝当前 patch |
+| `NEEDS_MANUAL_CHECK` | Human Review 要求补充人工验证 |
 | `Promote` | 将 RR Candidate 写入 PATCH_RULES |
 | `Reject` | 拒绝 RR Candidate |
 | `Defer` | 暂缓 RR Candidate |
@@ -397,7 +415,7 @@ Promote
 ### Archive
 
 ```
-归档
+Human ACCEPTED 后归档
 ```
 
 ---

@@ -288,9 +288,11 @@ Implement (自动)
 ↓
 Verify (自动)
 ↓
-[暂停] 输出 VERIFY_REPORT
+[暂停] 输出 VERIFY_REPORT，进入 Human Review
 ↓
-Optional: 询问 RR Candidate
+Human Review → ACCEPTED / REOPENED / REJECTED / NEEDS_MANUAL_CHECK
+↓
+Human ACCEPTED 后 Optional: 询问 RR Candidate
 ↓
 用户决定 Promote / Reject / Defer
 ↓
@@ -305,7 +307,8 @@ Optional: 询问 RR Candidate
 |-------------|----------|
 | Analyze Result | Problem Understanding + Patch ID 确认 |
 | Locked Plan | 是否开始实现确认 |
-| Verify Result | 查看 VERIFY_REPORT，决定是否提交 |
+| Verify Result | 查看 VERIFY_REPORT，进入 Human Review |
+| Human Review | ACCEPTED / REOPENED / REJECTED / NEEDS_MANUAL_CHECK |
 | RR Candidate | Promote / Reject / Defer 决定 |
 
 ### User Commands at Pause Points
@@ -319,6 +322,10 @@ Optional: 询问 RR Candidate
 | `开始实现` | 确认 Lock，进入 Implement |
 | `停止` | 立即停止 |
 | `回到 Analyze` | 返回 Phase 1 |
+| `ACCEPTED` | Human Review 接受当前 patch |
+| `REOPENED` | Human Review 要求重新打开并返回 Analyze |
+| `REJECTED` | Human Review 拒绝当前 patch |
+| `NEEDS_MANUAL_CHECK` | Human Review 要求补充人工验证 |
 | `Promote` | 将 RR Candidate 写入 PATCH_RULES |
 | `Reject` | 拒绝 RR Candidate |
 | `Defer` | 暂缓 RR Candidate |
@@ -565,6 +572,10 @@ Patch ID 一旦进入 Locked Plan：
 
 在进入 Verify 阶段前，AI 必须首先检查代码审查依赖 skill 是否已安装并可用。
 
+`mr-review` 是 Verify 阶段的 static review dependency。它用于增强代码审查，不是最终业务验收。`mr-review` PASS 不等于 patch ACCEPTED。
+
+`mr-review` 只属于 Verify 阶段。缺失不得阻塞 Activation、Analyze、Pre-Lock Validation、Lock 或 Implement，只能影响 Verify 状态。
+
 **Dependency**:
 - Skill name: `mr-review` / `mr_review`
 - Default source: `https://github.com/gong0019/mr_review.git`
@@ -578,11 +589,21 @@ Patch ID 一旦进入 Locked Plan：
 4. 当前工作区内显式配置的 dependency path
 
 **If missing**:
-- AI 必须下载/安装该 review skill 到可写、可复用的 skills root。
-- 下载目标不得写死为某个用户、某个机器或某个 agent 私有路径。
-- 若没有宿主环境提供的安装器，可使用 Git 从 Default source 下载到已确定的 skills root。
-- 若运行环境需要用户授权网络访问或文件写入，AI 必须请求授权；授权被拒绝或下载失败时，VERIFY_REPORT 必须记录 `MR-Review Dependency: Missing`，且最终状态不能为 PASS。
+- AI 可以报告 `Missing`。
+- AI 可以说明推荐安装方式和推荐安装路径。
+- AI must request explicit human authorization before downloading or installing `mr-review`.
+- 未获得用户明确授权前，AI 不得 git clone、下载、写入 skills root 或修改任何 skill 安装目录。
+- 授权后，下载目标不得写死为某个用户、某个机器或某个 agent 私有路径。
+- 授权后若没有宿主环境提供的安装器，可使用 Git 从 Default source 下载到已确定的 skills root。
+- 用户拒绝授权或下载失败时，VERIFY_REPORT 必须记录 `MR-Review Dependency: Missing`，状态只能是 WARNING 或 FAIL，不能为 PASS。
 - 下载后必须重新检查 Required files 是否存在；检查失败时不得声称已执行 `mr-review`。
+
+**Installation audit record**:
+- source URL
+- commit hash / tag / version
+- install path
+- required files check result
+- whether installation succeeded
 
 ### Hard Rule: mr-review Integration (Static Verification Core)
 
@@ -592,6 +613,7 @@ AI 必须针对当前 Patch 的 Git Diff 执行 `mr-review` 审查流：
 - **跨边界追踪**：在变更跨越 API、模板、DOM、配置、数据层或构建边界时，结合 `context-reader.md` 追踪被修改或删除的标识符、API 契约、页面模板变量等跨文件/跨层级的“隐性契约”。
 - **证据要求**：VERIFY_REPORT 必须记录 review skill 的解析路径、是否安装、覆盖的文件范围和未验证项。
 - **阻断红线**：若 `mr-review` 发现了任何 **Confirmed Bugs**，或者发现了超出 `Allowed Files` 锁定的修改文件，**VERIFY_REPORT 状态必须判定为 FAIL**，拒绝通过该补丁。
+- **缺失处理**：如果 `mr-review` 缺失、用户拒绝安装、安装失败或 Required files 检查失败，不得声称已执行 `mr-review`；必须记录 `Unverified Item: mr-review not executed`，VERIFY_REPORT 状态只能是 WARNING 或 FAIL。
 
 ### Hard Rule: Fix Verification First
 
@@ -608,9 +630,19 @@ AI 必须针对当前 Patch 的 Git Diff 执行 `mr-review` 审查流：
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | Fix Result=Fixed、`mr-review` 无 Confirmed Bugs、无越界、无 Forbidden、无未验证关键项 | ✅ 边界与代码质量检查均通过，可进入人工审查 |
+| PASS | Fix Result=Fixed、`mr-review` 无 Confirmed Bugs、无越界、无 Forbidden、无未验证关键项 | ✅ 边界与代码质量检查通过，但仍必须进入 Human Review |
 | WARNING | Fix Result=Partially Fixed、`mr-review` 缺失/安装失败、或 `mr-review` 发现部分非致命 Risks/Edge Cases，但无 Confirmed Bugs、无越界、无 Forbidden | ⚠️ 必须人工验证 Unverified Items 后决定 |
 | FAIL | `mr-review` 发现任何 Confirmed Bugs、Fix Result=Not Fixed/Unknown、触碰 Forbidden、超出 Allowed | ❌ 必须停止，根据风险决定回滚或返回 Analyze |
+
+### Hard Rule: Human Review Gate
+
+Verify 完成后必须进入 Human Review。
+
+- 即使 `mr-review` 通过，patch 仍然必须进入 Human Review。
+- Human 未 ACCEPTED 前，不得 archive。
+- Human 未 ACCEPTED 前，不得开始下一个 patch。
+- `mr-review` PASS 不等于 Human ACCEPTED。
+- VERIFY_REPORT 默认 Human Status 必须是 `PENDING` 或 `NEEDS_MANUAL_CHECK`，不能默认 `ACCEPTED`。
 
 ---
 
@@ -713,7 +745,8 @@ none → analyze (DRAFT) → analyze (LOCKED) → locked → implement → verif
 
 ### When to Archive
 
-- Verify PASS 或 WARNING（已人工验证）
+- VERIFY_REPORT 已生成
+- Human Review 状态为 ACCEPTED
 - 用户确认归档
 
 ### Steps
@@ -765,9 +798,11 @@ none → analyze (DRAFT) → analyze (LOCKED) → locked → implement → verif
 ### Verify 阶段
 
 1. 认真检查 VERIFY_REPORT.md
-2. **PASS 不代表业务完全正确**，仍需人工审查
-3. **WARNING 必须人工验证后决定是否提交**
-4. **FAIL 必须停止，根据风险决定回滚或返回 Analyze**
+2. **mr-review 是静态审查依赖，不是业务验收**
+3. **PASS 不代表业务完全正确**，必须进入 Human Review
+4. **Human 未 ACCEPTED 前，不得 archive 或开始下一个 patch**
+5. **WARNING 必须人工验证后决定是否提交**
+6. **FAIL 必须停止，根据风险决定回滚或返回 Analyze**
 
 ---
 
@@ -793,4 +828,6 @@ none → analyze (DRAFT) → analyze (LOCKED) → locked → implement → verif
 | Patch ID Must Confirm | AI 提议，Human 确认 |
 | Locked Plan Cannot Change | Lock 后不得修改 Patch ID 或边界 |
 | Problem First, Process Second | 流程服务于问题修复 |
+| mr-review Is Static Review | `mr-review` 只属于 Verify，不是业务验收 |
+| Human Review Required | `mr-review` PASS 不等于 Human ACCEPTED |
 | Human Controls Promote | AI 提议，Human 决定 |

@@ -13,7 +13,7 @@
 | Field | Value | Description |
 |-------|-------|-------------|
 | `patch_id` | [patch-id] | 当前 patch ID |
-| `current_phase` | [none / analyze / pre_lock / locked / implement / verify / done] | 当前所处阶段 |
+| `current_phase` | [none / analyze / pre_lock / locked / implement / verify / human_review / accepted / reopened / rejected / needs_manual_check / archived] | 当前所处阶段 |
 | `locked` | [true / false] | Analyze 结果是否已锁定 |
 | `validation_passed` | [true / false / pending] | Pre-Lock Validation 是否通过 |
 | `blocking_questions` | [list / empty] | 未确认的问题列表 |
@@ -24,10 +24,10 @@
 
 ---
 
-## Phase Flow (v3.0)
+## Phase Flow (v3.1)
 
 ```
-none → analyze (DRAFT) → pre_lock → analyze (LOCKED) → locked → implement → verify → done
+none → analyze (DRAFT) → pre_lock → analyze (LOCKED) → locked → implement → verify → human_review → accepted → archived
 ```
 
 ### Valid Transitions
@@ -41,7 +41,14 @@ none → analyze (DRAFT) → pre_lock → analyze (LOCKED) → locked → implem
 | analyze (LOCKED) | locked | 用户输入 `确认` + Validation 已通过 |
 | locked | implement | 用户输入 `开始实现` |
 | implement | verify | Implement 完成，自动进入 |
-| verify | done | VERIFY_REPORT 状态为 PASS 或 WARNING（人工确认后） |
+| verify | human_review | VERIFY_REPORT 生成完成 |
+| human_review | accepted | Human 明确 ACCEPTED |
+| human_review | reopened | Human 要求返回 Analyze 或重新打开问题 |
+| human_review | rejected | Human 拒绝当前 patch |
+| human_review | needs_manual_check | Human 要求补充人工验证 |
+| accepted | archived | Human ACCEPTED 后归档 |
+| reopened | analyze | 返回 Analyze 重新分析 |
+| needs_manual_check | human_review | 补充验证后继续 Human Review |
 | any | analyze | 用户输入 `修改分析` 或 `回到 Analyze` |
 
 ### Invalid Transitions
@@ -54,6 +61,9 @@ none → analyze (DRAFT) → pre_lock → analyze (LOCKED) → locked → implem
 | pre_lock | locked | **必须 Validation 通过** |
 | implement | locked | 禁止回退 |
 | verify | implement | 禁止回退（除非 FAIL） |
+| verify | archived | 必须先进入 human_review 并获得 accepted |
+| human_review | archived | 必须先进入 accepted |
+| verify | analyze | 仅 FAIL、REOPENED 或用户明确要求时允许 |
 
 ---
 
@@ -91,7 +101,7 @@ blocking_questions: [list of questions]
 | Field | Value |
 |-------|-------|
 | patch_id | [patch-id] |
-| current_phase | [analyze / pre_lock / locked / implement / verify / done] |
+| current_phase | [analyze / pre_lock / locked / implement / verify / human_review / accepted / reopened / rejected / needs_manual_check / archived] |
 | locked | [true / false] |
 | validation_passed | [true / false / pending] |
 | last_modified | [timestamp] |
@@ -123,6 +133,9 @@ blocking_questions: [list of questions]
 | locked | [timestamp] | [done / pending] |
 | implement | [timestamp] | [done / skipped] |
 | verify | [timestamp] | [done / skipped] |
+| human_review | [timestamp] | [PENDING / ACCEPTED / REOPENED / REJECTED / NEEDS_MANUAL_CHECK] |
+| accepted | [timestamp] | [done / skipped] |
+| archived | [timestamp] | [done / skipped] |
 
 ## Notes
 
@@ -139,6 +152,8 @@ blocking_questions: [list of questions]
 4. **禁止 implement 阶段重新解释需求**：检查 LAST_LOCKED_PLAN.md
 5. **每次阶段变化必须更新此文件**
 6. **FAIL 状态必须停止**，根据风险决定回滚或返回 analyze
+7. **Verify 后必须进入 Human Review**
+8. **Human 未 ACCEPTED 前禁止 archive 或开始下一个 patch**
 
 ---
 
