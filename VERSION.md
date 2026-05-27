@@ -10,6 +10,19 @@
 
 ---
 
+## v3.1.0 (2026-05-27): mr-review Integration & Portable Dependency Install
+
+### Release Summary
+
+全面整合 `mr-review` 代码质量评审引擎，并引入通用依赖检测与安装机制。
+
+**核心改动**：
+1. **mr-review 深度融合**：在 Phase 4: Verify 阶段，AI 必须使用 `mr-review` 的高风险语言规范和 cross-layer 追踪清单对 Diff 代码进行深度静态审查，任何 Confirmed Bugs 或边界越界将直接强制判定为 **FAIL** 并予以阻断。
+2. **通用依赖检查与安装**：AI 在 Verify 阶段前，若检测到环境缺少 `mr-review` 技能包，必须下载/安装到可写、可复用的 skills root。安装路径不得写死为某个用户、某个机器或某个 agent 私有路径；若环境要求授权，必须先请求授权。
+3. **验证证据披露**：在验证报告模板中，增加依赖解析、安装来源、审查覆盖范围和未验证项记录，避免将未执行的审查伪装成已通过。
+
+---
+
 ## v3.0.3 (2024-05-25): Pre-Lock Validation
 
 ### Release Summary

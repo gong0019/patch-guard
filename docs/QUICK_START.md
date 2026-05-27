@@ -39,9 +39,9 @@ PatchGuard 是一个 **AI Patch Governance System**，用于治理 AI Coding 工
 
 | Status | Condition | Meaning |
 |--------|-----------|---------|
-| PASS | 无越界、无 Forbidden、无未验证关键项 | 边界检查通过，可进入提交前人工审查 |
-| WARNING | 无越界、无 Forbidden，但存在未验证项 | **必须人工验证 Unverified Items 后决定** |
-| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan | 必须停止，根据风险决定回滚或返回 Analyze |
+| PASS | 无越界、无 Forbidden、`mr-review` 无 Confirmed Bugs、无未验证关键项 | 边界与代码质量检查均通过，可进入人工审查 |
+| WARNING | 无越界、无 Forbidden，`mr-review` 无 Confirmed Bugs，但存在未验证项、部分修复或 review skill 缺失/安装失败 | **必须人工验证 Unverified Items 后决定** |
+| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、`mr-review` 发现 Confirmed Bugs | 必须停止，根据风险决定回滚或返回 Analyze |
 
 ---
 

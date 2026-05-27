@@ -35,6 +35,18 @@ PatchGuard 通过结构化流程解决这些问题。
 
 ---
 
+## Verify Review Dependency (v3.1)
+
+Verify 阶段必须先检测代码审查依赖 skill：`mr-review` / `mr_review`。
+
+- 优先使用当前运行环境已暴露的同名 skill
+- 其次检查 PatchGuard 同级目录中的 `../mr_review` 或 `../mr-review`
+- 缺失时必须下载/安装到可写、可复用的 skills root
+- 安装目标不得写死为某个用户、某个机器或某个 agent 私有路径
+- 若安装失败或未获授权，VERIFY_REPORT 必须记录缺口，最终状态不能为 PASS
+
+---
+
 ## Critical Rule: Explicit Invocation
 
 **只要用户显式调用 `/PatchGuard`，就必须进入流程。**

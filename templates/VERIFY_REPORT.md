@@ -39,6 +39,36 @@
 
 ---
 
+## MR-Review Code Quality Assessment (v3.1 - Powered by mr-review)
+
+**利用 `mr-review` 引擎对当前修改的代码进行全覆盖质量与安全性深度静态审查。**
+
+### Dependency Resolution
+
+- Skill name: [mr-review / mr_review]
+- Resolved path: [已安装路径；缺失则填写 Missing]
+- Install attempted: [Yes / No / Not Needed]
+- Install source: [如有下载，填写来源 URL / installer / version]
+- Required files checked: [SKILL.md, references/workflow.md, references/report-format.md]
+- Review coverage: [列出已覆盖 changed files；若未全覆盖，状态不能为 PASS]
+
+### Confirmed Bugs
+
+[若有 Confirmed Bugs，请在此列出（影响文件、行号、根因、影响、修复方向），状态将强制为 FAIL]
+- [必须填写：None 或问题列表，并附依据]
+
+### Risks / Edge Cases
+
+[列出可能存在的隐性运行时、发布或维护风险]
+- [必须填写：None 或风险列表，并附依据]
+
+### Verification Gaps
+
+- **静态自查**：[说明已使用的 mr-review 文件、覆盖范围和结论]
+- **动态局限性声明**：[说明本次无法运行的测试/环境限制；若已运行测试，列出命令和结果]
+
+---
+
 ## Modified Files
 
 | File | Changes Summary |
@@ -144,13 +174,13 @@
 
 ## Recommendation
 
-### Status Definition (v2.0)
+### Status Definition (v3.1 - Powered by mr-review)
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | 无越界、无 Forbidden、**无未验证关键项** | ✅ 边界检查通过，可进入提交前人工审查 |
-| WARNING | 无越界、无 Forbidden，**但存在未验证项** | ⚠️ 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查 |
-| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、或新增未 Allowed 文件 | ❌ 必须停止，并根据风险决定回滚或返回 rr analyze |
+| PASS | 无越界、无 Forbidden、`mr-review` 无 Confirmed Bugs、**无未验证关键项** | ✅ 边界与代码质量检查均通过，可进入提交前人工审查 |
+| WARNING | 无越界、无 Forbidden，`mr-review` 无 Confirmed Bugs，**但存在未验证项、部分修复或 review skill 缺失/安装失败** | ⚠️ 必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查 |
+| FAIL | 触碰 Forbidden、超出 Allowed、违反 Locked Plan、`mr-review` 发现 Confirmed Bugs、或新增未 Allowed 文件 | ❌ 必须停止，并根据风险决定回滚或返回 rr analyze |
 
 ### Hard Rule
 
@@ -158,7 +188,7 @@
 
 ### Final Recommendation
 
-- PASS：边界检查通过，可进入提交前人工审查
+- PASS：边界与代码质量检查均通过，可进入提交前人工审查
 - WARNING：必须人工验证 Unverified Items 后，再决定是否进入提交前人工审查
 - FAIL：必须停止，并根据风险决定回滚或返回 rr analyze
 

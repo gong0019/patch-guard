@@ -1,3 +1,10 @@
+---
+name: PatchGuard
+description: |
+  AI patch governance protocol. Forces Analyze/Lock/Implement/Verify workflow
+  before code changes to keep patch scope minimal and controlled.
+---
+
 # PatchGuard - AI Patch Governance Protocol
 
 ## Role Definition
@@ -820,7 +827,7 @@ Proposed Patch ID: [根据需求生成的 patch-id]
 
 ### Objective
 
-确认原始问题是否被修复，检查修改是否符合边界约束。
+确认原始问题是否被修复，使用 `mr-review` 引擎对所做修改进行全覆盖代码质量与安全性深度审查，并检查修改是否符合边界约束。
 
 ### Trigger
 
@@ -836,14 +843,47 @@ Proposed Patch ID: [根据需求生成的 patch-id]
 | Section | Required | Priority |
 |---------|----------|----------|
 | Fix Verification | ✅ | **First** - 必须先填写 |
-| Modified Files | ✅ | Second |
-| New Files Created | ✅ | Third |
-| Boundary Check | ✅ | Fourth |
-| Unverified Items | ✅ | Fifth |
-| Evidence | ✅ | Sixth |
-| Manual Verification Required | ✅ | Seventh |
-| Risks | ✅ | Eighth |
+| MR-Review Assessment | ✅ | **Second** - 必须整合 mr-review 报告 |
+| Modified Files | ✅ | Third |
+| New Files Created | ✅ | Fourth |
+| Boundary Check | ✅ | Fifth |
+| Unverified Items | ✅ | Sixth |
+| Evidence | ✅ | Seventh |
+| Manual Verification Required | ✅ | Eighth |
+| Risks | ✅ | Ninth |
 | Final Recommendation | ✅ | Last |
+
+### Hard Rule: Review Skill Dependency Check and Install
+
+在进入 Verify 阶段前，AI 必须首先检查代码审查依赖 skill 是否已安装并可用。
+
+**Dependency**:
+- Skill name: `mr-review` / `mr_review`
+- Default source: `https://github.com/gong0019/mr_review.git`
+- Required files: `SKILL.md`, `references/workflow.md`, `references/report-format.md`
+- Optional high-risk checklist: `references/language-checks.md`, `references/context-reader.md`
+
+**Resolution order**:
+1. 当前运行环境已暴露的同名 skill
+2. 当前 PatchGuard skill 同级目录中的 `../mr_review` 或 `../mr-review`
+3. 用户或宿主环境声明的 skills root
+4. 当前工作区内显式配置的 dependency path
+
+**If missing**:
+- AI 必须下载/安装该 review skill 到可写、可复用的 skills root。
+- 下载目标不得写死为某个用户、某个机器或某个 agent 私有路径。
+- 若没有宿主环境提供的安装器，可使用 Git 从 Default source 下载到已确定的 skills root。
+- 若运行环境需要用户授权网络访问或文件写入，AI 必须请求授权；授权被拒绝或下载失败时，VERIFY_REPORT 必须记录 `MR-Review Dependency: Missing`，且最终状态不能为 PASS。
+- 下载后必须重新检查 Required files 是否存在；检查失败时不得声称已执行 `mr-review`。
+
+### Hard Rule: mr-review Integration (Static Verification Core)
+
+AI 必须针对当前 Patch 的 Git Diff 执行 `mr-review` 审查流：
+- **全量覆盖**：覆盖当前 Patch 的全部 changed files，不得只抽样高风险文件。
+- **静态扫描**：结合 `mr-review` 中的 `workflow.md`、`report-format.md` 和适用的 `language-checks.md` 对修改的代码逐行审查。
+- **跨边界追踪**：在变更跨越 API、模板、DOM、配置、数据层或构建边界时，结合 `context-reader.md` 追踪被修改或删除的标识符、API 契约、页面模板变量等跨文件/跨层级的“隐性契约”。
+- **证据要求**：VERIFY_REPORT 必须记录 review skill 的解析路径、是否安装、覆盖的文件范围和未验证项。
+- **阻断红线**：若 `mr-review` 发现了任何 **Confirmed Bugs**，或者发现了超出 `Allowed Files` 锁定的修改文件，**VERIFY_REPORT 状态必须判定为 FAIL**，拒绝通过该补丁。
 
 ### Hard Rule: Fix Verification First
 
@@ -860,9 +900,9 @@ Proposed Patch ID: [根据需求生成的 patch-id]
 
 | Status | Condition | Action |
 |--------|-----------|--------|
-| PASS | Fix Result=Fixed、无越界、无 Forbidden、无未验证关键项 | ✅ 边界检查通过，可进入提交前人工审查 |
-| WARNING | 无越界、无 Forbidden，但存在未验证项或 Fix Result=Partially Fixed | ⚠️ 必须人工验证 Unverified Items 后决定 |
-| FAIL | Fix Result=Not Fixed/Unknown、触碰 Forbidden、超出 Allowed | ❌ 必须停止，根据风险决定回滚或返回 Analyze |
+| PASS | Fix Result=Fixed、`mr-review` 无 Confirmed Bugs、无越界、无 Forbidden、无未验证关键项 | ✅ 边界与代码质量检查均通过，可进入人工审查 |
+| WARNING | Fix Result=Partially Fixed、`mr-review` 缺失/安装失败、或 `mr-review` 发现部分非致命 Risks/Edge Cases，但无 Confirmed Bugs、无越界、无 Forbidden | ⚠️ 必须人工验证 Unverified Items 后决定 |
+| FAIL | `mr-review` 发现任何 Confirmed Bugs、Fix Result=Not Fixed/Unknown、触碰 Forbidden、超出 Allowed | ❌ 必须停止，根据风险决定回滚或返回 Analyze |
 
 ### Important Notes
 
