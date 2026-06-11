@@ -1,5 +1,5 @@
 ---
-name: PatchGuard
+name: patch-guard
 description: |
   AI patch governance protocol. Forces Analyze/Lock/Implement/Verify workflow
   before code changes to keep patch scope minimal and controlled.
