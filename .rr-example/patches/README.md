@@ -1,6 +1,6 @@
 # Patch Session Example
 
-本目录是一个完整的 patch session 示例，展示 PatchGuard v3.0 的文件结构。
+本目录是一个完整的 patch session 示例，展示 patch-guard v3.0 的文件结构。
 
 ---
 

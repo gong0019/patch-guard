@@ -5,7 +5,7 @@ description: |
   before code changes to keep patch scope minimal and controlled.
 ---
 
-# PatchGuard - AI Patch Governance Protocol
+# patch-guard - AI Patch Governance Protocol
 
 ## Role Definition
 
@@ -28,7 +28,7 @@ description: |
 
 ### Highest Priority Rule
 
-**只要用户消息中显式出现 `/PatchGuard`，就必须进入 PatchGuard 流程。**
+**只要用户消息中显式出现 `/patch-guard`，就必须进入 patch-guard 流程。**
 
 这是最高优先级规则，高于：
 - 问题复杂度判断
@@ -37,7 +37,7 @@ description: |
 
 ### Forbidden Bypass Reasons
 
-禁止使用以下理由绕过 PatchGuard：
+禁止使用以下理由绕过 patch-guard：
 
 | Forbidden Reason | Why Forbidden |
 |------------------|---------------|
@@ -47,11 +47,11 @@ description: |
 | "用户只是报告 bug" | 报告 bug 也需要分析 |
 | "上一个 patch 已 PASS" | 新问题是新 patch |
 | "可以快速修复" | 快速修复不等于安全修复 |
-| "不需要完整流程" | 流程完整性是 PatchGuard 核心价值 |
+| "不需要完整流程" | 流程完整性是 patch-guard 核心价值 |
 
 ### Required First Response
 
-如果用户显式调用 `/PatchGuard`，AI 第一响应必须：
+如果用户显式调用 `/patch-guard`，AI 第一响应必须：
 
 1. **进入 Analyze 阶段**
 2. **禁止修改任何代码**
@@ -118,18 +118,18 @@ description: |
 
 **Activation Contract 优先级最高。**
 
-`/PatchGuard` 的激活规则写在 SKILL.md / AGENTS.md / Project Rules 中。
+`/patch-guard` 的激活规则写在 SKILL.md / AGENTS.md / Project Rules 中。
 
 **不能依赖 PATCH_RULES.md 是否存在对应规则来决定是否激活。**
 
-即使 PATCH_RULES.md 完全不存在，`/PatchGuard` 也必须激活。
+即使 PATCH_RULES.md 完全不存在，`/patch-guard` 也必须激活。
 
 ### Activation Handshake Format
 
-调用 `/PatchGuard` 后第一响应必须是 Activation Handshake：
+调用 `/patch-guard` 后第一响应必须是 Activation Handshake：
 
 ```
-PatchGuard Activated
+patch-guard Activated
 Phase: Analyze
 Code Modification: Disabled
 Patch ID: [Provided / Proposed / Pending Confirmation]
@@ -182,7 +182,7 @@ AI 只能：
 
 如果无法读取 PATCH_RULES.md：
 
-- ✅ 不得跳过 PatchGuard
+- ✅ 不得跳过 patch-guard
 - ✅ 在 Handshake 标记 Rules Check: Unknown
 - ✅ 继续进入 Analyze
 - ✅ 在 ANALYZE_REPORT 的 Risk 中记录 "rules file not checked"
@@ -191,12 +191,12 @@ AI 只能：
 
 ## User Entry Point (v3.0)
 
-### Single Entry: /PatchGuard
+### Single Entry: /patch-guard
 
 用户只需要输入一个命令：
 
 ```
-/PatchGuard
+/patch-guard
 ```
 
 后面跟需求或 bug 描述。
@@ -208,7 +208,7 @@ AI 只能：
 ### Example
 
 ```
-/PatchGuard
+/patch-guard
 
 Patch ID: 2026-05-24-comment-replies
 
@@ -249,7 +249,7 @@ Proposed Patch ID: comment-replies
 ### Flow
 
 ```
-/PatchGuard + 需求
+/patch-guard + 需求
 ↓
 Analyze (自动)
 ↓
@@ -479,7 +479,7 @@ Blocking Questions:
 ### User Can Explicitly Provide
 
 ```
-/PatchGuard
+/patch-guard
 
 Patch ID: 2026-05-24-comment-replies
 ```
@@ -546,7 +546,7 @@ fix-comment-delete
 
 ### Problem First, Process Second
 
-**PatchGuard 的所有流程都必须服务于确认原始问题是否被修复。**
+**patch-guard 的所有流程都必须服务于确认原始问题是否被修复。**
 
 禁止为了填模板而填模板。
 
@@ -870,7 +870,7 @@ Proposed Patch ID: [根据需求生成的 patch-id]
 
 **Resolution order**:
 1. 当前运行环境已暴露的同名 skill
-2. 当前 PatchGuard skill 同级目录中的 `../mr_review` 或 `../mr-review`
+2. 当前 patch-guard skill 同级目录中的 `../mr_review` 或 `../mr-review`
 3. 用户或宿主环境声明的 skills root
 4. 当前工作区内显式配置的 dependency path
 
@@ -1013,7 +1013,7 @@ And **at least one** evidence criterion:
 
 ## Core Principles
 
-1. **Single Entry Point**: 用户只输入 `/PatchGuard`
+1. **Single Entry Point**: 用户只输入 `/patch-guard`
 2. **Automatic Progression**: 内部阶段自动推进
 3. **Pause at Confirmations**: 只在关键点暂停等待用户确认
 4. **One Patch One Directory**: 每个 patch 独立 `.rr/patches/<patch-id>/`
@@ -1028,7 +1028,7 @@ And **at least one** evidence criterion:
 
 | Action | User Input | AI Behavior |
 |--------|------------|-------------|
-| Start | `/PatchGuard + 需求` | 自动 Analyze |
+| Start | `/patch-guard + 需求` | 自动 Analyze |
 | Confirm Analyze | `确认` | 自动 Lock |
 | Start Implement | `开始实现` | 自动 Implement → Verify |
 | Stop | `停止` | 立即停止 |

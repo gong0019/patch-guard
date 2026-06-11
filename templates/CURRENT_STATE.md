@@ -34,7 +34,7 @@ none → analyze (DRAFT) → pre_lock → analyze (LOCKED) → locked → implem
 
 | From | To | Condition |
 |------|-----|-----------|
-| none | analyze | 用户输入 `/PatchGuard` |
+| none | analyze | 用户输入 `/patch-guard` |
 | analyze (DRAFT) | pre_lock | 用户确认 Patch ID + Problem Understanding |
 | pre_lock | analyze (LOCKED) | Pre-Lock Validation 全部通过 |
 | pre_lock | analyze (DRAFT) | Pre-Lock Validation 失败 + Blocking Questions |

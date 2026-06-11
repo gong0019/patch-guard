@@ -1,8 +1,8 @@
-# PatchGuard - Quick Start Guide
+# patch-guard - Quick Start Guide
 
-## What is PatchGuard?
+## What is patch-guard?
 
-PatchGuard 是一个 **AI Patch Governance System**，用于治理 AI Coding 工具的代码修改行为。
+patch-guard 是一个 **AI Patch Governance System**，用于治理 AI Coding 工具的代码修改行为。
 
 **核心目标**：让 AI 在修改代码时：
 - 不乱改
@@ -59,11 +59,11 @@ PatchGuard 是一个 **AI Patch Governance System**，用于治理 AI Coding 工
 
 ## Critical Rule: Explicit Invocation (v3.0)
 
-**只要用户显式调用 `/PatchGuard`，就必须进入流程。**
+**只要用户显式调用 `/patch-guard`，就必须进入流程。**
 
 ### Forbidden Shortcut Excuses
 
-禁止使用以下理由绕过 PatchGuard：
+禁止使用以下理由绕过 patch-guard：
 
 | Forbidden Excuse | Why Forbidden |
 |------------------|---------------|
@@ -75,7 +75,7 @@ PatchGuard 是一个 **AI Patch Governance System**，用于治理 AI Coding 工
 
 ### Required Behavior
 
-如果用户显式调用 `/PatchGuard`：
+如果用户显式调用 `/patch-guard`：
 
 1. **必须进入 Analyze**
 2. **禁止直接修改代码**
@@ -105,10 +105,10 @@ PatchGuard 是一个 **AI Patch Governance System**，用于治理 AI Coding 工
 
 ### Activation Handshake
 
-调用 `/PatchGuard` 后第一响应：
+调用 `/patch-guard` 后第一响应：
 
 ```
-PatchGuard Activated
+patch-guard Activated
 Phase: Analyze
 Code Modification: Disabled
 Patch ID: [Provided / Proposed / Pending]
@@ -183,12 +183,12 @@ Blocking Questions:
 
 ## Quick Start
 
-### Single Entry Point: /PatchGuard
+### Single Entry Point: /patch-guard
 
 **用户只需要输入一个命令，后面跟需求或 bug 描述。**
 
 ```
-/PatchGuard
+/patch-guard
 
 Patch ID: 2026-05-24-comment-replies
 
@@ -208,7 +208,7 @@ AI 会自动：
 ## Automatic Flow
 
 ```
-/PatchGuard + 需求
+/patch-guard + 需求
 ↓
 Analyze (自动)
 ↓
@@ -261,7 +261,7 @@ Optional: RR Candidate → 用户决定
 ### If User Provides Patch ID
 
 ```
-/PatchGuard
+/patch-guard
 
 Patch ID: 2026-05-24-comment-replies
 
@@ -273,7 +273,7 @@ AI 直接使用用户提供的 Patch ID。
 ### If User Does Not Provide Patch ID
 
 ```
-/PatchGuard
+/patch-guard
 
 [需求描述]
 ```
@@ -359,7 +359,7 @@ project/
 ### Start
 
 ```
-/PatchGuard
+/patch-guard
 
 Patch ID: 2026-05-24-fix-comment-delete
 

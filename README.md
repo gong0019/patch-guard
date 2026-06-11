@@ -1,4 +1,4 @@
-# PatchGuard - AI Patch Governance Protocol
+# patch-guard - AI Patch Governance Protocol
 
 治理 AI Coding 中的增量修改行为，防止 patch explosion、scope creep、architecture drift。
 
@@ -6,7 +6,7 @@
 
 ## Project Overview
 
-PatchGuard 是一个 **AI Patch Governance 协议**，用于治理 AI Coding 工具的代码修改行为。
+patch-guard 是一个 **AI Patch Governance 协议**，用于治理 AI Coding 工具的代码修改行为。
 
 核心目标：
 - 不乱改
@@ -18,7 +18,7 @@ PatchGuard 是一个 **AI Patch Governance 协议**，用于治理 AI Coding 工
 
 ---
 
-## Why PatchGuard
+## Why patch-guard
 
 AI Coding 工具在修改代码时存在以下问题：
 
@@ -31,7 +31,7 @@ AI Coding 工具在修改代码时存在以下问题：
 | 只完成流程 | 填模板但没有证明问题修复 |
 | **跳过 Analyze** | AI 以"简单问题"为由绕过流程，直接修改代码 |
 
-PatchGuard 通过结构化流程解决这些问题。
+patch-guard 通过结构化流程解决这些问题。
 
 ---
 
@@ -42,7 +42,7 @@ Verify 阶段必须先检测代码审查依赖 skill：`mr-review` / `mr_review`
 `mr-review` 是 Verify 阶段的 static review dependency。它用于增强代码审查，不是最终业务验收。`mr-review` PASS 不等于 patch ACCEPTED。
 
 - 优先使用当前运行环境已暴露的同名 skill
-- 其次检查 PatchGuard 同级目录中的 `../mr_review` 或 `../mr-review`
+- 其次检查 patch-guard 同级目录中的 `../mr_review` 或 `../mr-review`
 - 缺失时可以报告 Missing、说明推荐安装方式，并请求用户授权安装
 - 未获得用户明确授权前，不得 git clone、下载或写入 skills root
 - 安装目标不得写死为某个用户、某个机器或某个 agent 私有路径
@@ -53,7 +53,7 @@ Verify 阶段必须先检测代码审查依赖 skill：`mr-review` / `mr_review`
 
 ## Critical Rule: Explicit Invocation
 
-**只要用户显式调用 `/PatchGuard`，就必须进入流程。**
+**只要用户显式调用 `/patch-guard`，就必须进入流程。**
 
 禁止以下 shortcut 理由：
 
@@ -72,10 +72,10 @@ Verify 阶段必须先检测代码审查依赖 skill：`mr-review` / `mr_review`
 
 ### Activation Handshake
 
-调用 `/PatchGuard` 后第一响应：
+调用 `/patch-guard` 后第一响应：
 
 ```
-PatchGuard Activated
+patch-guard Activated
 Phase: Analyze
 Code Modification: Disabled
 Patch ID: [Provided / Proposed / Pending]
@@ -92,7 +92,7 @@ Next Step: Problem Understanding
 
 **缺少对应 promoted rule 不阻塞 activation。**
 
-即使 PATCH_RULES.md 完全不存在，`/PatchGuard` 也必须激活。
+即使 PATCH_RULES.md 完全不存在，`/patch-guard` 也必须激活。
 
 | Rules Status | Behavior |
 |--------------|----------|
@@ -111,7 +111,7 @@ Next Step: Problem Understanding
 
 ---
 
-## What PatchGuard Is Not
+## What patch-guard Is Not
 
 明确边界：
 
@@ -125,12 +125,12 @@ Next Step: Problem Understanding
 
 ## User Entry Point (v3.0)
 
-### Single Entry: /PatchGuard
+### Single Entry: /patch-guard
 
 用户只需要输入一个命令：
 
 ```
-/PatchGuard
+/patch-guard
 ```
 
 后面跟需求或 bug 描述。
@@ -142,7 +142,7 @@ Next Step: Problem Understanding
 ### Example
 
 ```
-/PatchGuard
+/patch-guard
 
 Patch ID: 2026-05-24-comment-replies
 
@@ -153,7 +153,7 @@ Patch ID: 2026-05-24-comment-replies
 ### Automatic Flow
 
 ```
-/PatchGuard + 需求
+/patch-guard + 需求
 ↓
 Analyze (自动) → [暂停] 等待确认
 ↓
@@ -176,7 +176,7 @@ Human ACCEPTED 后 Optional: Promote RR Candidate
 
 | Principle | Description |
 |-----------|-------------|
-| Single Entry Point | 用户只输入 `/PatchGuard` |
+| Single Entry Point | 用户只输入 `/patch-guard` |
 | Automatic Progression | 内部阶段自动推进 |
 | Pause at Confirmations | 只在关键点暂停等待用户确认 |
 | One Patch One Directory | 每个 patch 独立 `.rr/patches/<patch-id>/` |
@@ -201,7 +201,7 @@ Human ACCEPTED 后 Optional: Promote RR Candidate
 
 输入命令启动工作流：
 ```
-/PatchGuard
+/patch-guard
 
 Patch ID: 2026-05-24-your-topic
 
@@ -270,7 +270,7 @@ AI 会自动：
 ## Repository Structure
 
 ```
-PatchGuard/
+patch-guard/
 ├── SKILL.md                  # 核心 Skill Prompt 规范
 ├── templates/               # 模板文件
 │   ├── ANALYZE_REPORT.md
@@ -298,7 +298,7 @@ PatchGuard/
 ## Current Version: V3.0-beta
 
 **已支持**：
-- 单入口 `/PatchGuard`
+- 单入口 `/patch-guard`
 - 自动阶段推进
 - Patch ID 确认机制
 - `.rr/patches/<patch-id>/` 独立目录

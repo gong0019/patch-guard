@@ -20,11 +20,11 @@ PATCH_RULES.md should contain only active, human-confirmed regression rules.
 
 ### Rules File Does NOT Block Activation
 
-**PATCH_RULES.md 是否存在不影响 /PatchGuard 激活。**
+**PATCH_RULES.md 是否存在不影响 /patch-guard 激活。**
 
 即使 PATCH_RULES.md 完全不存在、无法读取、或缺少对应规则：
 
-- `/PatchGuard` 仍然必须激活
+- `/patch-guard` 仍然必须激活
 - 必须进入 Analyze 阶段
 - 不能跳过流程
 
@@ -85,14 +85,14 @@ Typical AI patch mistakes include:
 - Local bug fixed by unrelated refactor
 - Patch scope expanded beyond locked boundary
 - Verification claims fixed but no evidence was provided
-- **Skipping Analyze when user explicitly invoked /PatchGuard** (CRITICAL)
+- **Skipping Analyze when user explicitly invoked /patch-guard** (CRITICAL)
 - **Bypassing flow with "simple problem" or "quick fix" excuses** (CRITICAL)
 
 ---
 
 ## Critical Rule: Explicit Invocation
 
-**When user explicitly invokes `/PatchGuard`, never skip Analyze.**
+**When user explicitly invokes `/patch-guard`, never skip Analyze.**
 
 Typical violation excuses:
 - "root cause is clear"

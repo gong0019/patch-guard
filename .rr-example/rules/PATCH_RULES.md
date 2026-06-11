@@ -14,10 +14,10 @@
 
 ## Activation Rule Check Note
 
-**PATCH_RULES.md 是否存在不影响 /PatchGuard 激活。**
+**PATCH_RULES.md 是否存在不影响 /patch-guard 激活。**
 
 即使本文件不存在或缺少对应规则：
-- `/PatchGuard` 仍然必须激活
+- `/patch-guard` 仍然必须激活
 - 必须进入 Analyze 阶段
 - 不能跳过流程
 - 不能自动写入新规则
@@ -112,7 +112,7 @@
 
 **Explicit Invocation Override**
 
-当用户显式调用 `/PatchGuard` 时：
+当用户显式调用 `/patch-guard` 时：
 
 禁止：
 - 以任何理由跳过 Analyze
@@ -127,7 +127,7 @@
 - 输出最小 ANALYZE_REPORT（Problem Understanding + Patch ID + Boundary）
 - 等待用户确认
 
-**原因**：多次发生 AI 以 "简单问题" 为由绕过 PatchGuard，直接修改代码，引入 regression。
+**原因**：多次发生 AI 以 "简单问题" 为由绕过 patch-guard，直接修改代码，引入 regression。
 
 **Promoted By**: Human on 2024-05-24
 

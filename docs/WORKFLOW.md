@@ -1,8 +1,8 @@
-# PatchGuard - Detailed Workflow
+# patch-guard - Detailed Workflow
 
 ## Overview
 
-PatchGuard 通过五个内部阶段治理 AI 的代码修改行为：
+patch-guard 通过五个内部阶段治理 AI 的代码修改行为：
 
 1. **Analyze** - 分析问题，禁止改代码
 2. **Lock** - 锁定计划，生成边界约束
@@ -11,7 +11,7 @@ PatchGuard 通过五个内部阶段治理 AI 的代码修改行为：
 5. **Promote** - Optional: 规则沉淀
 
 **关键变化 (v3.0)**：
-- 用户只输入 `/PatchGuard`，不需要手动触发阶段命令
+- 用户只输入 `/patch-guard`，不需要手动触发阶段命令
 - 内部阶段自动线性推进
 - 只在关键确认点暂停等待用户确认
 
@@ -21,7 +21,7 @@ PatchGuard 通过五个内部阶段治理 AI 的代码修改行为：
 
 ### Highest Priority
 
-**只要用户消息中显式出现 `/PatchGuard`，就必须进入 PatchGuard 流程。**
+**只要用户消息中显式出现 `/patch-guard`，就必须进入 patch-guard 流程。**
 
 这是最高优先级规则，高于：
 - 问题复杂度判断
@@ -30,7 +30,7 @@ PatchGuard 通过五个内部阶段治理 AI 的代码修改行为：
 
 ### Forbidden Bypass Reasons
 
-禁止使用以下理由绕过 PatchGuard：
+禁止使用以下理由绕过 patch-guard：
 
 | Forbidden Reason | Why Forbidden |
 |------------------|---------------|
@@ -40,11 +40,11 @@ PatchGuard 通过五个内部阶段治理 AI 的代码修改行为：
 | "用户只是报告 bug" | 报告 bug 也需要分析 |
 | "上一个 patch 已 PASS" | 新问题是新 patch |
 | "可以快速修复" | 快速修复不等于安全修复 |
-| "不需要完整流程" | 流程完整性是 PatchGuard 核心价值 |
+| "不需要完整流程" | 流程完整性是 patch-guard 核心价值 |
 
 ### Required First Response
 
-如果用户显式调用 `/PatchGuard`，AI 第一响应必须：
+如果用户显式调用 `/patch-guard`，AI 第一响应必须：
 
 1. **进入 Analyze 阶段**
 2. **禁止修改任何代码**
@@ -83,7 +83,7 @@ PatchGuard 通过五个内部阶段治理 AI 的代码修改行为：
 
 **Activation Contract 优先级最高。**
 
-`/PatchGuard` 的激活规则写在 SKILL.md / Project Rules 中。
+`/patch-guard` 的激活规则写在 SKILL.md / Project Rules 中。
 
 **不能依赖 PATCH_RULES.md 是否存在来决定是否激活。**
 
@@ -91,10 +91,10 @@ PatchGuard 通过五个内部阶段治理 AI 的代码修改行为：
 
 ### Activation Handshake
 
-调用 `/PatchGuard` 后第一响应必须：
+调用 `/patch-guard` 后第一响应必须：
 
 ```
-PatchGuard Activated
+patch-guard Activated
 Phase: Analyze
 Code Modification: Disabled
 Patch ID: [Provided / Proposed / Pending Confirmation]
@@ -253,12 +253,12 @@ Blocking Questions:
 
 ## User Entry Point
 
-### Single Entry: /PatchGuard
+### Single Entry: /patch-guard
 
 用户只需要输入一个命令：
 
 ```
-/PatchGuard
+/patch-guard
 
 Patch ID: 2026-05-24-comment-replies
 
@@ -270,7 +270,7 @@ Patch ID: 2026-05-24-comment-replies
 ### Automatic Flow
 
 ```
-/PatchGuard + 需求
+/patch-guard + 需求
 ↓
 Analyze (自动)
 ↓
@@ -337,7 +337,7 @@ Human ACCEPTED 后 Optional: 询问 RR Candidate
 ### User Can Explicitly Provide
 
 ```
-/PatchGuard
+/patch-guard
 
 Patch ID: 2026-05-24-comment-replies
 
@@ -394,7 +394,7 @@ Patch ID 一旦进入 Locked Plan：
 
 ### Trigger
 
-用户输入 `/PatchGuard` + 需求
+用户输入 `/patch-guard` + 需求
 
 ### Rules
 
@@ -584,7 +584,7 @@ Patch ID 一旦进入 Locked Plan：
 
 **Resolution order**:
 1. 当前运行环境已暴露的同名 skill
-2. 当前 PatchGuard skill 同级目录中的 `../mr_review` 或 `../mr-review`
+2. 当前 patch-guard skill 同级目录中的 `../mr_review` 或 `../mr-review`
 3. 用户或宿主环境声明的 skills root
 4. 当前工作区内显式配置的 dependency path
 
@@ -821,7 +821,7 @@ none → analyze (DRAFT) → analyze (LOCKED) → locked → implement → verif
 
 | Principle | Description |
 |-----------|-------------|
-| Single Entry | 用户只输入 `/PatchGuard` |
+| Single Entry | 用户只输入 `/patch-guard` |
 | Automatic Progression | 内部阶段自动推进 |
 | Pause at Confirmations | 只在关键点暂停 |
 | One Patch One Directory | 每个 patch 独立 `.rr/patches/<patch-id>/` |
